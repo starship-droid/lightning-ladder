@@ -1,6 +1,6 @@
 # ⚡ Lightning Ladder
 
-**Live demo:** https://starship-droid.github.io/sprint-agenda-standup/
+**Live demo:** https://lightning-ladder.netlify.app/
 
 A real-time agenda timer for standups, retros, planning sessions — anything where you need structured turns and a shared queue. Everyone joins from the same link, names appear instantly across all devices, and a two-phase timer keeps each speaker on track.
 
