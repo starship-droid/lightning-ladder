@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>STAND UP // MID SPRINT</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gun/0.2020.1235/gun.min.js"></script>
+<title>⚡ Lightning Ladder</title>
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
 
@@ -43,53 +43,109 @@
 
   body::after {
     content: ''; position: fixed; inset: 0;
-    background-image: linear-gradient(rgba(245,166,35,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,0.025) 1px, transparent 1px);
-    background-size: 40px 40px; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(245,166,35,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,166,35,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
   }
 
-  .app { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 32px 24px 100px; }
+  .app {
+    position: relative; z-index: 1;
+    max-width: 880px; margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
 
+  /* ── HEADER ── */
   header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
+    margin-bottom: 36px; padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
   }
 
-  .header-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: var(--amber); opacity: 0.7; margin-bottom: 6px; }
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
 
-  h1 { font-family: 'Orbitron', monospace; font-size: clamp(22px, 5vw, 34px); font-weight: 900; color: #fff; letter-spacing: 0.05em; line-height: 1; }
-  h1 span { color: var(--amber); }
+  .logo-bolt {
+    font-size: 28px; line-height: 1;
+    filter: drop-shadow(0 0 8px rgba(245,166,35,0.6));
+    animation: bolt-flicker 4s ease-in-out infinite;
+  }
 
-  .status-dot { display: flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim); margin-top: 10px; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse-dot 2s ease-in-out infinite; }
+  @keyframes bolt-flicker {
+    0%,90%,100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(245,166,35,0.6)); }
+    92%          { opacity: 0.5; filter: drop-shadow(0 0 2px rgba(245,166,35,0.2)); }
+    94%          { opacity: 1; filter: drop-shadow(0 0 12px rgba(245,166,35,0.9)); }
+    96%          { opacity: 0.7; }
+  }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 5vw, 32px);
+    font-weight: 900; color: #fff; letter-spacing: 0.08em; line-height: 1;
+  }
+
+  h1 em { color: var(--amber); font-style: normal; }
+
+  .header-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.35em; color: var(--text-dim);
+    margin-bottom: 10px; text-transform: uppercase;
+  }
+
+  .status-dot {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim);
+  }
+
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .dot.connecting { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .dot.offline    { background: var(--red);   box-shadow: 0 0 8px var(--red); animation: none; }
+
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .participant-count { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 700; color: var(--amber); text-align: right; }
-  .participant-count span { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); display: block; letter-spacing: 0.2em; margin-top: 2px; }
+  .participant-count {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px; font-weight: 700; color: var(--amber); text-align: right;
+  }
+  .participant-count span {
+    font-size: 11px; font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim); display: block; letter-spacing: 0.2em; margin-top: 2px;
+  }
 
-  /* BUTTONS */
-  .btn { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; padding: 11px 20px; border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; position: relative; overflow: hidden; }
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; padding: 11px 20px; border: none; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; position: relative; overflow: hidden;
+  }
   .btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.1); opacity:0; transition:opacity 0.15s; }
   .btn:hover::after { opacity:1; }
   .btn:active { transform:scale(0.97); }
   .btn:disabled { opacity:0.3; cursor:not-allowed; }
   .btn:disabled::after { display:none; }
-  .btn-amber { background: var(--amber); color: #000; }
-  .btn-amber:hover { box-shadow: 0 0 20px var(--amber-glow); }
-  .btn-blue  { background: var(--blue);  color: #000; }
-  .btn-blue:hover  { box-shadow: 0 0 20px var(--blue-glow); }
-  .btn-ghost { background: transparent; color: var(--amber); border: 1px solid var(--border-bright); }
-  .btn-ghost:hover { border-color: var(--amber); box-shadow: 0 0 12px var(--amber-glow); }
-  .btn-green { background: var(--green); color: #000; }
-  .btn-green:hover { box-shadow: 0 0 20px var(--green-glow); }
+  .btn-amber { background:var(--amber); color:#000; }
+  .btn-amber:hover { box-shadow:0 0 20px var(--amber-glow); }
+  .btn-blue  { background:var(--blue);  color:#000; }
+  .btn-blue:hover  { box-shadow:0 0 20px var(--blue-glow); }
+  .btn-ghost { background:transparent; color:var(--amber); border:1px solid var(--border-bright); }
+  .btn-ghost:hover { border-color:var(--amber); box-shadow:0 0 12px var(--amber-glow); }
+  .btn-green { background:var(--green); color:#000; }
+  .btn-green:hover { box-shadow:0 0 20px var(--green-glow); }
 
-  /* JOIN */
+  /* ── JOIN SECTION ── */
   .join-section {
-    background: var(--surface); border: 1px solid var(--border); padding: 20px 24px;
-    margin-bottom: 28px; position: relative;
-    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+    background:var(--surface); border:1px solid var(--border); padding:20px 24px;
+    margin-bottom:28px; position:relative;
+    clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);
   }
   .section-label {
-    position: absolute; top:-1px; left:20px;
+    position:absolute; top:-1px; left:20px;
     font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:0.3em; color:var(--amber);
     background:var(--surface); padding:0 8px; transform:translateY(-50%);
   }
@@ -103,16 +159,19 @@
   input[type="text"]::placeholder { color:var(--text-dim); font-style:italic; }
   input[type="text"]:focus { border-color:var(--amber); box-shadow:0 0 0 2px var(--amber-glow),inset 0 0 20px rgba(245,166,35,0.04); }
 
-  .timer-config { display:flex; align-items:center; gap:12px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); flex-wrap:wrap; row-gap:10px; }
+  .timer-config {
+    display:flex; align-items:center; gap:12px; margin-top:14px; padding-top:14px;
+    border-top:1px solid var(--border); flex-wrap:wrap; row-gap:10px;
+  }
   .timer-config label { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.2em; color:var(--text-dim); }
   .timer-group { display:flex; align-items:center; gap:8px; }
   .timer-stepper { display:flex; align-items:center; border:1px solid var(--border); }
   .timer-stepper button { background:var(--surface2); border:none; color:var(--amber); width:28px; height:28px; cursor:pointer; font-size:15px; transition:background 0.15s; }
   .timer-stepper button:hover { background:var(--amber-glow); }
   .timer-stepper .val { width:44px; text-align:center; font-family:'Orbitron',monospace; font-size:12px; color:#fff; background:var(--bg); height:28px; line-height:28px; border-left:1px solid var(--border); border-right:1px solid var(--border); }
-  .timer-sep { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.1em; }
+  .timer-sep { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); }
 
-  /* TIMER PANEL */
+  /* ── TIMER PANEL ── */
   .timer-panel { background:var(--surface); border:1px solid var(--border); padding:28px 28px 24px; margin-bottom:28px; position:relative; display:none; }
   .timer-panel.visible { display:block; }
 
@@ -137,7 +196,7 @@
   .timer-display.danger   { color:var(--red); text-shadow:0 0 40px var(--red-glow); animation:flicker 0.6s ease-in-out infinite; }
   @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.75} }
 
-  .progress-bar { height:3px; background:var(--surface2); margin-bottom:22px; position:relative; overflow:hidden; }
+  .progress-bar { height:3px; background:var(--surface2); margin-bottom:22px; overflow:hidden; }
   .progress-fill { height:100%; transition:width 1s linear,background 0.5s; background:var(--amber); box-shadow:0 0 8px var(--amber); }
   .progress-fill.qa-phase { background:var(--blue); box-shadow:0 0 8px var(--blue); }
   .progress-fill.warning  { background:#ff8c00; box-shadow:0 0 8px #ff8c00; }
@@ -150,7 +209,7 @@
   @keyframes warn-pulse { 0%,100%{border-color:rgba(255,59,59,0.3)} 50%{border-color:rgba(255,59,59,0.75)} }
   .warning-text { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--red); }
 
-  /* ROSTER */
+  /* ── ROSTER ── */
   .roster-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
   .roster-title  { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em; color:var(--text-dim); }
   .roster-list   { display:flex; flex-direction:column; gap:4px; }
@@ -188,7 +247,7 @@
   .edit-actions { display:none; align-items:center; gap:3px; flex-shrink:0; }
   .edit-actions.visible { display:flex; }
 
-  .icon-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; transition:all 0.15s; flex-shrink:0; line-height:1; }
+  .icon-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; transition:all 0.15s; flex-shrink:0; }
   .icon-btn:hover { border-color:var(--amber); color:var(--amber); }
   .icon-btn.del:hover { border-color:var(--red); color:var(--red); }
   .icon-btn:disabled { opacity:0.2; cursor:not-allowed; pointer-events:none; }
@@ -205,11 +264,60 @@
   .empty-state .big-icon { font-size:30px; margin-bottom:12px; opacity:0.35; }
   .empty-state p { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:0.2em; line-height:1.9; }
 
-  #conn-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; flex-direction:column; gap:16px; }
+  /* ── FOOTER VERSION ── */
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .version-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+
+  .version-tag strong {
+    color: var(--amber);
+    font-weight: 400;
+  }
+
+  .sync-status-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sync-indicator {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--amber); box-shadow: 0 0 6px var(--amber);
+    animation: pulse-dot 1.5s infinite;
+  }
+  .sync-indicator.live    { background:var(--green); box-shadow:0 0 6px var(--green); }
+  .sync-indicator.offline { background:var(--red);   box-shadow:0 0 6px var(--red); animation:none; }
+
+  /* ── CONNECTING OVERLAY ── */
+  #conn-overlay {
+    position:fixed; inset:0; background:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; flex-direction:column; gap:16px;
+  }
   #conn-overlay .spin { width:38px; height:38px; border:2px solid var(--border); border-top-color:var(--amber); border-radius:50%; animation:spin 0.8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
+  #conn-overlay .conn-title { font-family:'Orbitron',monospace; font-size:16px; font-weight:700; color:var(--amber); letter-spacing:0.1em; }
   #conn-overlay p { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em; color:var(--text-dim); }
 
+  /* ── TOAST ── */
   .toast { position:fixed; bottom:28px; right:28px; background:var(--surface2); border:1px solid var(--border-bright); padding:11px 18px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--amber); z-index:10000; transform:translateY(70px); opacity:0; transition:all 0.28s; max-width:300px; }
   .toast.show { transform:translateY(0); opacity:1; }
 
@@ -225,17 +333,21 @@
 
 <div id="conn-overlay">
   <div class="spin"></div>
-  <p>CONNECTING</p>
+  <div class="conn-title">⚡ LIGHTNING LADDER</div>
+  <p>CONNECTING TO SYNC</p>
 </div>
 
 <div class="app">
   <header>
     <div class="header-left">
-      <div class="header-tag">// MID-SPRINT STANDUP</div>
-      <h1>STAND<span>UP</span></h1>
+      <div class="header-sub">// AGENDA TIMER</div>
+      <div class="logo-row">
+        <span class="logo-bolt">⚡</span>
+        <h1>LIGHTNING <em>LADDER</em></h1>
+      </div>
       <div class="status-dot">
-        <div class="dot"></div>
-        <span id="live-count">0 IN QUEUE</span>
+        <div class="dot connecting" id="sync-dot"></div>
+        <span id="live-count">CONNECTING...</span>
       </div>
     </div>
     <div>
@@ -306,60 +418,68 @@
   <div class="roster-list" id="roster-list"></div>
 
   <div class="start-next-area" id="start-next-area">
-    <button class="btn btn-amber" id="start-next-btn">▶ START STANDUP</button>
+    <button class="btn btn-amber" id="start-next-btn">▶ START SESSION</button>
   </div>
 
   <div class="session-complete" id="session-complete">
     <h2>SESSION COMPLETE</h2>
     <p>ALL SPEAKERS DONE // SHIP IT</p>
   </div>
+
+  <footer>
+    <div class="version-tag">⚡ LIGHTNING LADDER &nbsp;·&nbsp; <strong>v1.1</strong></div>
+    <div class="sync-status-tag">
+      <div class="sync-indicator" id="footer-sync-dot"></div>
+      <span id="footer-sync-label">CONNECTING</span>
+    </div>
+  </footer>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
-// GUN.JS REAL-TIME SYNC
-// Uses public Gun relay servers — no account, no config needed.
-// All devices on the same URL share the same session key automatically.
+// ⚡ LIGHTNING LADDER v1.1
+// Real-time sync via Gun.js (decentralised P2P, no account needed)
+// CDN: https://cdn.jsdelivr.net/npm/gun/gun.js
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Derive a stable session key from the page's origin + pathname
-// so every deployment gets its own isolated session.
-const SESSION_KEY = 'standup_' + (location.hostname + location.pathname).replace(/[^a-zA-Z0-9]/g, '_');
+const VERSION = 'v1.1';
 
-const gun = Gun([
-  'https://gun-manhattan.herokuapp.com/gun',
-  'https://gun-us.herokuapp.com/gun',
-  'https://gundb-relay-mlmedia.glitch.me/gun'
-]);
+// Session key scoped to this deployment's URL so each team gets isolation
+const SESSION_KEY = 'lightning_ladder__' +
+  (location.hostname + location.pathname).replace(/[^a-zA-Z0-9]/g, '_').replace(/_+/g, '_');
 
-const db = gun.get(SESSION_KEY);
+// ── GUN INIT ────────────────────────────────────────────────────────────────
+// Multiple public relays for redundancy. Gun will use whichever responds.
+const gun = Gun({
+  peers: [
+    'https://gun-manhattan.herokuapp.com/gun',
+    'https://gun-us.herokuapp.com/gun',
+    'https://peer.wallie.io/gun',
+  ],
+  localStorage: false, // avoid stale local storage bleed
+});
 
-// ─── LOCAL STATE (rendered from Gun data) ────────────────────────────────────
-// We keep a local mirror so we can render without waiting for Gun round-trips.
-// Structure:
-//   state.speakers  = [ { id, name, status:'waiting'|'present'|'qa'|'done', breakout, order } ]
-//   state.presentMins, state.qaMins
-//   state.phase     = 'present' | 'qa'
-//   state.timerRunning
-//   state.activeStartedAt  (ms timestamp or null)
+const db = gun.get(SESSION_KEY).get('state');
 
+// ── STATE ───────────────────────────────────────────────────────────────────
 let state = {
-  speakers: [],
+  speakers: [],       // [{ id, name, status:'waiting'|'present'|'qa'|'done', breakout }]
   presentMins: 5,
   qaMins: 5,
-  phase: 'present',
+  phase: 'present',   // current active phase
   timerRunning: false,
-  activeStartedAt: null,
+  activeStartedAt: null, // epoch ms when current timer started
 };
 
-let timerInterval = null;
-let secsLeft = 0;
-let totalSecs = 0;
-let gunReady = false;
+let timerInterval  = null;
+let secsLeft       = 0;
+let totalSecs      = 0;
+let isConnected    = false;
+let isSyncing      = false; // suppress echo from own writes
 
-// ─── DOM ─────────────────────────────────────────────────────────────────────
+// ── DOM ─────────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const nameInput     = $('name-input');
 const joinBtn       = $('join-btn');
@@ -386,86 +506,113 @@ const pillPresent   = $('pill-present');
 const pillQa        = $('pill-qa');
 const toast         = $('toast');
 const connOverlay   = $('conn-overlay');
+const syncDot       = $('sync-dot');
+const footerDot     = $('footer-sync-dot');
+const footerLabel   = $('footer-sync-label');
 
-// ─── GUN SYNC ────────────────────────────────────────────────────────────────
-// We store the entire state as a flat JSON string under one key.
-// Gun handles the real-time push to all connected clients.
-
-let ignoreNextUpdate = false; // prevent echo loop
-
-function pushState() {
-  // Serialise speakers array as JSON string (Gun can't store nested arrays natively)
-  const payload = JSON.stringify({
-    speakers: state.speakers,
-    presentMins: state.presentMins,
-    qaMins: state.qaMins,
-    phase: state.phase,
-    timerRunning: state.timerRunning,
-    activeStartedAt: state.activeStartedAt,
-  });
-  ignoreNextUpdate = true;
-  db.get('data').put({ v: payload });
+// ── SYNC STATUS UI ───────────────────────────────────────────────────────────
+function setConnected(connected) {
+  isConnected = connected;
+  if (connected) {
+    syncDot.className = 'dot';
+    footerDot.className = 'sync-indicator live';
+    footerLabel.textContent = 'LIVE SYNC';
+  } else {
+    syncDot.className = 'dot offline';
+    footerDot.className = 'sync-indicator offline';
+    footerLabel.textContent = 'OFFLINE';
+  }
 }
 
+// ── PUSH STATE TO GUN ────────────────────────────────────────────────────────
+// We serialise the whole state to a JSON string to avoid Gun's nested object
+// merging quirks (which can cause stale array data to linger).
+function pushState() {
+  isSyncing = true;
+  db.put({ v: JSON.stringify(state) }, ack => {
+    if (ack.err) {
+      console.warn('Gun write failed:', ack.err);
+      setConnected(false);
+    } else {
+      setConnected(true);
+    }
+    // Reset flag after a tick so our own .on() fires have already been skipped
+    setTimeout(() => { isSyncing = false; }, 100);
+  });
+}
+
+// ── SUBSCRIBE TO GUN ────────────────────────────────────────────────────────
 function initGun() {
-  db.get('data').on(function(data) {
+  let connectedOnce = false;
+
+  db.on(function(data) {
     if (!data || !data.v) {
-      // No data yet — just show UI
-      if (!gunReady) { gunReady = true; connOverlay.style.display = 'none'; render(); }
+      // Node exists but is empty — first run or after reset
+      if (!connectedOnce) {
+        connectedOnce = true;
+        setConnected(true);
+        connOverlay.style.display = 'none';
+        render();
+      }
       return;
     }
 
-    if (ignoreNextUpdate) { ignoreNextUpdate = false; return; }
+    if (isSyncing) return; // skip echo from our own write
 
     let remote;
     try { remote = JSON.parse(data.v); } catch(e) { return; }
 
-    if (!gunReady) {
-      gunReady = true;
+    if (!connectedOnce) {
+      connectedOnce = true;
+      setConnected(true);
       connOverlay.style.display = 'none';
     }
 
-    // Merge remote into local state
-    const prevActiveId = (state.speakers.find(s => s.status==='present'||s.status==='qa') || {}).id;
-    const prevRunning  = state.timerRunning;
+    // Detect what changed so we can resync the local timer if needed
+    const prevActiveId  = (state.speakers.find(s => s.status==='present'||s.status==='qa') || {}).id;
+    const prevRunning   = state.timerRunning;
+    const prevPhase     = state.phase;
 
     state = remote;
-    if (!state.speakers) state.speakers = [];
+    if (!Array.isArray(state.speakers)) state.speakers = [];
 
     presentValEl.textContent = state.presentMins || 5;
     qaValEl.textContent      = state.qaMins || 5;
 
-    const newActive    = state.speakers.find(s => s.status==='present'||s.status==='qa');
-    const newActiveId  = newActive ? newActive.id : null;
+    const newActive   = state.speakers.find(s => s.status==='present'||s.status==='qa');
+    const newActiveId = newActive ? newActive.id : null;
+
     const speakerChanged = newActiveId !== prevActiveId;
     const timerStarted   = state.timerRunning && !prevRunning;
+    const phaseChanged   = state.phase !== prevPhase;
 
-    if (speakerChanged || timerStarted) {
+    if (speakerChanged || timerStarted || phaseChanged) {
       syncTimerFromState();
     }
 
     render();
   });
 
-  // Timeout — if Gun hasn't responded in 4s, show UI anyway (offline mode)
+  // Fallback: if Gun hasn't connected in 5s, reveal UI in offline mode
   setTimeout(() => {
-    if (!gunReady) {
-      gunReady = true;
+    if (!connectedOnce) {
+      connectedOnce = true;
       connOverlay.style.display = 'none';
-      showToast('Working offline — sync unavailable');
+      setConnected(false);
+      showToast('Could not reach sync — working offline');
       render();
     }
-  }, 4000);
+  }, 5000);
 }
 
-// ─── TIMER ───────────────────────────────────────────────────────────────────
+// ── TIMER ────────────────────────────────────────────────────────────────────
 function syncTimerFromState() {
   clearTimer();
   const active = state.speakers.find(s => s.status==='present'||s.status==='qa');
   if (!active || !state.timerRunning || !state.activeStartedAt) return;
 
-  const mins  = state.phase==='qa' ? (state.qaMins||5) : (state.presentMins||5);
-  const total = mins * 60;
+  const mins    = state.phase === 'qa' ? (state.qaMins||5) : (state.presentMins||5);
+  const total   = mins * 60;
   const elapsed = Math.floor((Date.now() - state.activeStartedAt) / 1000);
   totalSecs = total;
   secsLeft  = Math.max(0, total - elapsed);
@@ -507,17 +654,22 @@ function updateDisplay(sec, total) {
   const isQa  = state.phase === 'qa';
   timerDisplay.classList.remove('warning','danger','qa-phase');
   progressFill.classList.remove('warning','danger','qa-phase');
-  if      (ratio <= 0)    { timerDisplay.classList.add('danger');  progressFill.classList.add('danger'); }
-  else if (ratio <= 0.25) { timerDisplay.classList.add('warning'); progressFill.classList.add('warning'); }
-  else if (isQa)          { timerDisplay.classList.add('qa-phase');progressFill.classList.add('qa-phase'); }
+  if      (ratio <= 0)    { timerDisplay.classList.add('danger');   progressFill.classList.add('danger'); }
+  else if (ratio <= 0.25) { timerDisplay.classList.add('warning');  progressFill.classList.add('warning'); }
+  else if (isQa)          { timerDisplay.classList.add('qa-phase'); progressFill.classList.add('qa-phase'); }
 }
 
-// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+// ── ACTIONS ──────────────────────────────────────────────────────────────────
 function joinQueue() {
   const name = nameInput.value.trim();
   if (!name) return;
-  if (state.speakers.find(s => s.name.toLowerCase() === name.toLowerCase())) { showToast('Name already in queue'); return; }
-  state.speakers.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2), name, status:'waiting', breakout:false, order: state.speakers.length });
+  if (state.speakers.find(s => s.name.toLowerCase() === name.toLowerCase())) {
+    showToast('Name already in queue'); return;
+  }
+  state.speakers.push({
+    id: Date.now() + '_' + Math.random().toString(36).slice(2),
+    name, status: 'waiting', breakout: false,
+  });
   nameInput.value = '';
   pushState(); render(); showToast(`${name} joined`);
 }
@@ -534,9 +686,10 @@ function activateSpeaker(idx) {
 
 function startTimer() {
   clearTimer();
-  state.timerRunning = true; state.activeStartedAt = Date.now();
+  state.timerRunning    = true;
+  state.activeStartedAt = Date.now();
   pushState();
-  const mins = state.phase==='qa' ? (state.qaMins||5) : (state.presentMins||5);
+  const mins = state.phase === 'qa' ? (state.qaMins||5) : (state.presentMins||5);
   totalSecs = mins * 60; secsLeft = totalSecs;
   breakoutWarn.classList.remove('visible');
   render(); runTimer();
@@ -546,9 +699,11 @@ function goToQA() {
   clearTimer();
   const idx = state.speakers.findIndex(s => s.status==='present');
   if (idx === -1) return;
-  state.speakers[idx].status = 'qa';
+  state.speakers[idx].status   = 'qa';
   state.speakers[idx].breakout = false;
-  state.phase = 'qa'; state.timerRunning = false; state.activeStartedAt = null;
+  state.phase          = 'qa';
+  state.timerRunning   = false;
+  state.activeStartedAt = null;
   pushState();
   totalSecs = (state.qaMins||5)*60; secsLeft = totalSecs;
   updateDisplay(secsLeft, totalSecs);
@@ -561,7 +716,9 @@ function markDone() {
   const idx = state.speakers.findIndex(s => s.status==='present'||s.status==='qa');
   if (idx === -1) return;
   state.speakers[idx].status = 'done';
-  state.timerRunning = false; state.activeStartedAt = null; state.phase = 'present';
+  state.timerRunning    = false;
+  state.activeStartedAt = null;
+  state.phase           = 'present';
   breakoutWarn.classList.remove('visible');
   pushState(); render();
 }
@@ -574,13 +731,15 @@ function startNextSpeaker() {
 
 function resetSession() {
   clearTimer();
-  state.speakers = [];
-  state.timerRunning = false; state.activeStartedAt = null; state.phase = 'present';
+  state.speakers        = [];
+  state.timerRunning    = false;
+  state.activeStartedAt = null;
+  state.phase           = 'present';
   breakoutWarn.classList.remove('visible');
   pushState(); render();
 }
 
-// ─── QUEUE MANAGEMENT ────────────────────────────────────────────────────────
+// ── QUEUE MANAGEMENT ─────────────────────────────────────────────────────────
 function deleteSpeaker(id) {
   state.speakers = state.speakers.filter(s => s.id !== id);
   pushState(); render();
@@ -588,7 +747,7 @@ function deleteSpeaker(id) {
 
 function moveSpeaker(id, dir) {
   const arr = state.speakers;
-  const i = arr.findIndex(s => s.id === id);
+  const i   = arr.findIndex(s => s.id === id);
   if (i === -1) return;
   const t = i + dir;
   if (t < 0 || t >= arr.length) return;
@@ -614,7 +773,7 @@ function confirmEdit(id) {
   render();
 }
 
-// ─── RENDER ──────────────────────────────────────────────────────────────────
+// ── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
   const spk     = state.speakers;
   const active  = spk.find(s => s.status==='present'||s.status==='qa');
@@ -622,9 +781,12 @@ function render() {
   const done    = spk.filter(s => s.status==='done');
   const allDone = spk.length > 0 && waiting.length === 0 && !active;
 
-  liveCount.textContent   = `${spk.length} IN QUEUE`;
+  liveCount.textContent   = isConnected
+    ? `${spk.length} IN QUEUE`
+    : `${spk.length} IN QUEUE (OFFLINE)`;
   headerCount.textContent = waiting.length + (active ? 1 : 0);
 
+  // ── Timer panel ──
   if (active) {
     timerPanel.classList.add('visible');
     activeNameEl.textContent = active.name;
@@ -644,7 +806,7 @@ function render() {
       updateDisplay(mins*60, mins*60);
     }
 
-    // Buttons
+    // Button logic
     if (!state.timerRunning) {
       if (phase === 'present') {
         startBtn.textContent = '▶ START PRESENT'; startBtn.className = 'btn btn-amber'; startBtn.style.display = '';
@@ -671,9 +833,10 @@ function render() {
     timerPanel.classList.remove('visible');
   }
 
+  // ── Start next / session complete ──
   if (!active && waiting.length > 0) {
     startNextArea.classList.add('visible');
-    startNextBtn.textContent = done.length === 0 ? '▶ START STANDUP' : '▶ START NEXT SPEAKER';
+    startNextBtn.textContent = done.length === 0 ? '▶ START SESSION' : '▶ START NEXT SPEAKER';
   } else {
     startNextArea.classList.remove('visible');
   }
@@ -681,8 +844,9 @@ function render() {
   sessionComp.classList.toggle('visible', allDone);
   resetBtn.style.display = spk.length > 0 ? '' : 'none';
 
+  // ── Roster ──
   if (spk.length === 0) {
-    rosterList.innerHTML = `<div class="empty-state"><div class="big-icon">◈</div><p>NO SPEAKERS QUEUED<br>ENTER YOUR NAME ABOVE TO JOIN</p></div>`;
+    rosterList.innerHTML = `<div class="empty-state"><div class="big-icon">⚡</div><p>NO SPEAKERS QUEUED<br>ENTER YOUR NAME ABOVE TO JOIN</p></div>`;
     return;
   }
 
@@ -712,7 +876,7 @@ function render() {
         <div class="queue-actions" ${isActive ? 'style="visibility:hidden;pointer-events:none"' : ''}>
           <button class="icon-btn up-btn"    title="Move up"   ${!canAct||i===0            ? 'disabled' : ''}>↑</button>
           <button class="icon-btn dn-btn"    title="Move down" ${!canAct||i===spk.length-1 ? 'disabled' : ''}>↓</button>
-          <button class="icon-btn edit-btn"  title="Edit"      ${!canAct                   ? 'disabled' : ''}>✎</button>
+          <button class="icon-btn edit-btn"  title="Edit name" ${!canAct                   ? 'disabled' : ''}>✎</button>
           <button class="icon-btn del del-btn" title="Remove"  ${isActive                  ? 'disabled' : ''}>✕</button>
         </div>
         <div class="edit-actions">
@@ -721,10 +885,10 @@ function render() {
         </div>
       </div>`;
 
-    div.querySelector('.up-btn')?.addEventListener('click',   () => moveSpeaker(s.id, -1));
-    div.querySelector('.dn-btn')?.addEventListener('click',   () => moveSpeaker(s.id, +1));
-    div.querySelector('.edit-btn')?.addEventListener('click', () => startEdit(s.id));
-    div.querySelector('.del-btn')?.addEventListener('click',  () => deleteSpeaker(s.id));
+    div.querySelector('.up-btn')?.addEventListener('click',       () => moveSpeaker(s.id, -1));
+    div.querySelector('.dn-btn')?.addEventListener('click',       () => moveSpeaker(s.id, +1));
+    div.querySelector('.edit-btn')?.addEventListener('click',     () => startEdit(s.id));
+    div.querySelector('.del-btn')?.addEventListener('click',      () => deleteSpeaker(s.id));
     div.querySelector('[data-save]')?.addEventListener('click',   () => confirmEdit(s.id));
     div.querySelector('[data-cancel]')?.addEventListener('click', () => render());
     div.querySelector('.edit-input')?.addEventListener('keydown', e => {
@@ -740,34 +904,35 @@ function esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ─── STEPPERS ────────────────────────────────────────────────────────────────
+// ── TIMER STEPPERS ───────────────────────────────────────────────────────────
 $('inc-present').addEventListener('click', () => { state.presentMins = Math.min((state.presentMins||5)+1,30); presentValEl.textContent = state.presentMins; pushState(); });
 $('dec-present').addEventListener('click', () => { state.presentMins = Math.max((state.presentMins||5)-1,1);  presentValEl.textContent = state.presentMins; pushState(); });
 $('inc-qa').addEventListener('click',      () => { state.qaMins      = Math.min((state.qaMins||5)+1,30);      qaValEl.textContent      = state.qaMins;      pushState(); });
 $('dec-qa').addEventListener('click',      () => { state.qaMins      = Math.max((state.qaMins||5)-1,1);       qaValEl.textContent      = state.qaMins;      pushState(); });
 
-// ─── BUTTON EVENTS ───────────────────────────────────────────────────────────
+// ── BUTTON EVENTS ────────────────────────────────────────────────────────────
 joinBtn.addEventListener('click', joinQueue);
 nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinQueue(); });
 
 startBtn.addEventListener('click', () => {
-  if (!state.speakers.find(s => s.status==='present'||s.status==='qa')) startNextSpeaker();
+  const hasActive = state.speakers.find(s => s.status==='present'||s.status==='qa');
+  if (!hasActive) startNextSpeaker();
   else startTimer();
 });
 
 nextPhaseBtn.addEventListener('click', goToQA);
 doneBtn.addEventListener('click', markDone);
 startNextBtn.addEventListener('click', startNextSpeaker);
-resetBtn.addEventListener('click', () => { if (confirm('Reset entire session?')) resetSession(); });
+resetBtn.addEventListener('click', () => { if (confirm('Reset entire session? This clears all speakers.')) resetSession(); });
 
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+// ── TOAST ────────────────────────────────────────────────────────────────────
 let toastT;
 function showToast(msg) {
   toast.textContent = msg; toast.classList.add('show');
   clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ─── BOOT ────────────────────────────────────────────────────────────────────
+// ── BOOT ─────────────────────────────────────────────────────────────────────
 initGun();
 </script>
 </body>
