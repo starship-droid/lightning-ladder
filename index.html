@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>STAND UP // MID SPRINT</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gun/0.2020.1235/gun.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
 
@@ -29,338 +30,194 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'IBM Plex Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
+    min-height: 100vh; overflow-x: hidden; position: relative;
   }
 
   body::before {
-    content: '';
-    position: fixed; inset: 0;
+    content: ''; position: fixed; inset: 0;
     background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
     pointer-events: none; z-index: 1000;
   }
 
   body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: linear-gradient(rgba(245,166,35,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(rgba(245,166,35,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(245,166,35,0.025) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none; z-index: 0;
   }
 
-  .app {
-    position: relative; z-index: 1;
-    max-width: 860px; margin: 0 auto;
-    padding: 32px 24px 80px;
-  }
+  .app { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 32px 24px 100px; }
 
   header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 40px; padding-bottom: 24px;
-    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px; padding-bottom: 20px; border-bottom: 1px solid var(--border);
   }
 
-  .header-tag {
-    font-family: 'Share Tech Mono', monospace; font-size: 10px;
-    letter-spacing: 0.3em; color: var(--amber); opacity: 0.7; margin-bottom: 6px;
-  }
+  .header-tag { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: var(--amber); opacity: 0.7; margin-bottom: 6px; }
 
-  h1 { font-family: 'Orbitron', monospace; font-size: clamp(22px,5vw,34px); font-weight: 900; color: #fff; letter-spacing: 0.05em; line-height: 1; }
+  h1 { font-family: 'Orbitron', monospace; font-size: clamp(22px, 5vw, 34px); font-weight: 900; color: #fff; letter-spacing: 0.05em; line-height: 1; }
   h1 span { color: var(--amber); }
 
-  .status-dot {
-    display: flex; align-items: center; gap: 8px;
-    font-family: 'Share Tech Mono', monospace; font-size: 11px;
-    letter-spacing: 0.15em; color: var(--text-dim); margin-top: 12px;
-  }
-
-  .dot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green); box-shadow: 0 0 8px var(--green);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
+  .status-dot { display: flex; align-items: center; gap: 8px; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.15em; color: var(--text-dim); margin-top: 10px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse-dot 2s ease-in-out infinite; }
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .participant-count {
-    font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 700;
-    color: var(--amber); text-align: right;
-  }
-  .participant-count span {
-    font-size: 11px; font-family: 'Share Tech Mono', monospace;
-    color: var(--text-dim); display: block; letter-spacing: 0.2em; margin-top: 2px;
-  }
+  .participant-count { font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 700; color: var(--amber); text-align: right; }
+  .participant-count span { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); display: block; letter-spacing: 0.2em; margin-top: 2px; }
 
-  /* JOIN */
-  .join-section {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 20px 24px; margin-bottom: 32px; position: relative;
-    clip-path: polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,0 100%);
-  }
-  .join-section::before {
-    content: 'IDENTIFY';
-    position: absolute; top: -1px; left: 20px;
-    font-family: 'Share Tech Mono', monospace; font-size: 9px;
-    letter-spacing: 0.3em; color: var(--amber);
-    background: var(--surface); padding: 0 8px; transform: translateY(-50%);
-  }
-
-  .join-row { display: flex; gap: 12px; align-items: stretch; }
-
-  input[type="text"] {
-    flex: 1; background: var(--bg); border: 1px solid var(--border);
-    color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 14px;
-    padding: 12px 16px; outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s; letter-spacing: 0.05em;
-  }
-  input[type="text"]::placeholder { color: var(--text-dim); font-style: italic; }
-  input[type="text"]:focus {
-    border-color: var(--amber);
-    box-shadow: 0 0 0 2px var(--amber-glow), inset 0 0 20px rgba(245,166,35,0.05);
-  }
-
-  .timer-config {
-    display: flex; align-items: center; gap: 12px;
-    margin-top: 14px; padding-top: 14px;
-    border-top: 1px solid var(--border); flex-wrap: wrap;
-  }
-  .timer-config label {
-    font-family: 'Share Tech Mono', monospace; font-size: 10px;
-    letter-spacing: 0.2em; color: var(--text-dim);
-  }
-  .timer-stepper { display: flex; align-items: center; border: 1px solid var(--border); }
-  .timer-stepper button {
-    background: var(--surface2); border: none; color: var(--amber);
-    width: 30px; height: 30px; cursor: pointer; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-  }
-  .timer-stepper button:hover { background: var(--amber-glow); }
-  .timer-stepper .val {
-    width: 50px; text-align: center; font-family: 'Orbitron', monospace;
-    font-size: 13px; color: #fff; background: var(--bg); height: 30px;
-    line-height: 30px; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
-  }
-
-  /* BTN */
-  .btn {
-    font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700;
-    letter-spacing: 0.15em; padding: 12px 24px; border: none; cursor: pointer;
-    transition: all 0.15s; white-space: nowrap; position: relative; overflow: hidden;
-  }
+  /* BUTTONS */
+  .btn { font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; padding: 11px 20px; border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap; position: relative; overflow: hidden; }
   .btn::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0.1); opacity:0; transition:opacity 0.15s; }
   .btn:hover::after { opacity:1; }
   .btn:active { transform:scale(0.97); }
+  .btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .btn:disabled::after { display:none; }
   .btn-amber { background: var(--amber); color: #000; }
   .btn-amber:hover { box-shadow: 0 0 20px var(--amber-glow); }
-  .btn-blue { background: var(--blue); color: #000; }
-  .btn-blue:hover { box-shadow: 0 0 20px var(--blue-glow); }
+  .btn-blue  { background: var(--blue);  color: #000; }
+  .btn-blue:hover  { box-shadow: 0 0 20px var(--blue-glow); }
   .btn-ghost { background: transparent; color: var(--amber); border: 1px solid var(--border-bright); }
   .btn-ghost:hover { border-color: var(--amber); box-shadow: 0 0 12px var(--amber-glow); }
   .btn-green { background: var(--green); color: #000; }
   .btn-green:hover { box-shadow: 0 0 20px var(--green-glow); }
-  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .btn:disabled::after { display: none; }
+
+  /* JOIN */
+  .join-section {
+    background: var(--surface); border: 1px solid var(--border); padding: 20px 24px;
+    margin-bottom: 28px; position: relative;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+  }
+  .section-label {
+    position: absolute; top:-1px; left:20px;
+    font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:0.3em; color:var(--amber);
+    background:var(--surface); padding:0 8px; transform:translateY(-50%);
+  }
+  .join-row { display:flex; gap:12px; align-items:stretch; }
+
+  input[type="text"] {
+    flex:1; background:var(--bg); border:1px solid var(--border); color:#fff;
+    font-family:'IBM Plex Mono',monospace; font-size:14px; padding:12px 16px; outline:none;
+    transition:border-color 0.2s, box-shadow 0.2s; letter-spacing:0.04em;
+  }
+  input[type="text"]::placeholder { color:var(--text-dim); font-style:italic; }
+  input[type="text"]:focus { border-color:var(--amber); box-shadow:0 0 0 2px var(--amber-glow),inset 0 0 20px rgba(245,166,35,0.04); }
+
+  .timer-config { display:flex; align-items:center; gap:12px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); flex-wrap:wrap; row-gap:10px; }
+  .timer-config label { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.2em; color:var(--text-dim); }
+  .timer-group { display:flex; align-items:center; gap:8px; }
+  .timer-stepper { display:flex; align-items:center; border:1px solid var(--border); }
+  .timer-stepper button { background:var(--surface2); border:none; color:var(--amber); width:28px; height:28px; cursor:pointer; font-size:15px; transition:background 0.15s; }
+  .timer-stepper button:hover { background:var(--amber-glow); }
+  .timer-stepper .val { width:44px; text-align:center; font-family:'Orbitron',monospace; font-size:12px; color:#fff; background:var(--bg); height:28px; line-height:28px; border-left:1px solid var(--border); border-right:1px solid var(--border); }
+  .timer-sep { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.1em; }
 
   /* TIMER PANEL */
-  .timer-panel {
-    background: var(--surface); border: 1px solid var(--border);
-    padding: 28px 24px; margin-bottom: 32px;
-    position: relative; display: none;
-    transition: border-color 0.4s;
-  }
-  .timer-panel.visible { display: block; }
-  .timer-panel.qa-mode { border-color: rgba(77,166,255,0.3); }
+  .timer-panel { background:var(--surface); border:1px solid var(--border); padding:28px 28px 24px; margin-bottom:28px; position:relative; display:none; }
+  .timer-panel.visible { display:block; }
 
-  .phase-pill {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'Share Tech Mono', monospace; font-size: 10px;
-    letter-spacing: 0.25em; padding: 5px 12px; margin-bottom: 16px;
-    border: 1px solid; transition: all 0.4s;
-  }
-  .phase-pill.present { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-glow); }
-  .phase-pill.qa { color: var(--blue); border-color: rgba(77,166,255,0.3); background: var(--blue-glow); }
-  .phase-dot { width:6px; height:6px; border-radius:50%; animation: pulse-dot 1s infinite; }
-  .phase-pill.present .phase-dot { background: var(--amber); }
-  .phase-pill.qa .phase-dot { background: var(--blue); }
+  .phase-strip { display:flex; gap:4px; margin-bottom:20px; }
+  .phase-pill { flex:1; padding:7px 10px; font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:0.2em; text-align:center; border:1px solid var(--border); color:var(--text-dim); background:var(--bg); transition:all 0.3s; }
+  .phase-pill.cur-present { border-color:var(--amber); color:var(--amber); background:var(--amber-glow); }
+  .phase-pill.cur-qa      { border-color:var(--blue);  color:var(--blue);  background:var(--blue-glow); }
+  .phase-pill.done-phase  { border-color:var(--green); color:var(--green); background:var(--green-glow); opacity:0.6; }
+  .phase-dot { display:inline-block; width:5px; height:5px; border-radius:50%; margin-right:6px; vertical-align:middle; background:currentColor; }
+  .phase-pill.cur-present .phase-dot, .phase-pill.cur-qa .phase-dot { animation:pulse-dot 1.2s ease-in-out infinite; }
 
-  .active-speaker-name {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(18px,4vw,26px); font-weight: 700;
-    color: #fff; margin-bottom: 20px; letter-spacing: 0.05em;
-  }
-  .active-speaker-name .index {
-    font-size: 11px; color: var(--text-dim); letter-spacing: 0.2em;
-    font-weight: 400; display: block; margin-bottom: 4px;
-    font-family: 'Share Tech Mono', monospace;
-  }
+  .active-speaker-name { font-family:'Orbitron',monospace; font-size:clamp(18px,4vw,26px); font-weight:700; color:#fff; margin-bottom:16px; letter-spacing:0.04em; }
+  .active-speaker-name .index { font-size:10px; color:var(--text-dim); letter-spacing:0.25em; font-weight:400; font-family:'Share Tech Mono',monospace; display:block; margin-bottom:4px; }
 
-  .timer-display {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(52px,12vw,88px); font-weight: 900;
-    letter-spacing: 0.05em; line-height: 1; margin-bottom: 8px;
-    transition: color 0.3s, text-shadow 0.3s;
-    color: var(--amber); text-shadow: 0 0 30px var(--amber-glow);
-  }
-  .timer-display.qa-col { color: var(--blue); text-shadow: 0 0 30px var(--blue-glow); }
-  .timer-display.warning { color: #ff8c00; text-shadow: 0 0 40px rgba(255,140,0,0.3); animation: flicker 1.5s ease-in-out infinite; }
-  .timer-display.danger { color: var(--red); text-shadow: 0 0 40px var(--red-glow); animation: flicker 0.6s ease-in-out infinite; }
+  .phase-label { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.25em; margin-bottom:5px; }
+  .phase-label.present { color:var(--amber); }
+  .phase-label.qa      { color:var(--blue); }
+
+  .timer-display { font-family:'Orbitron',monospace; font-size:clamp(52px,12vw,84px); font-weight:900; line-height:1; letter-spacing:0.05em; margin-bottom:8px; transition:color 0.3s,text-shadow 0.3s; color:var(--amber); text-shadow:0 0 30px var(--amber-glow); }
+  .timer-display.qa-phase { color:var(--blue); text-shadow:0 0 30px var(--blue-glow); }
+  .timer-display.warning  { color:#ff8c00; text-shadow:0 0 40px rgba(255,140,0,0.3); animation:flicker 1.5s ease-in-out infinite; }
+  .timer-display.danger   { color:var(--red); text-shadow:0 0 40px var(--red-glow); animation:flicker 0.6s ease-in-out infinite; }
   @keyframes flicker { 0%,100%{opacity:1} 50%{opacity:0.75} }
 
-  /* Dual progress track */
-  .progress-track {
-    height: 4px; background: var(--surface2); margin-bottom: 24px;
-    display: flex; gap: 3px;
-  }
-  .progress-segment { flex:1; position: relative; overflow: hidden; background: var(--surface2); }
-  .progress-segment.hidden { display: none; }
-  .progress-fill-bar {
-    position: absolute; inset: 0; width: 100%;
-    transform-origin: left; transform: scaleX(1);
-    transition: transform 1s linear, background 0.3s;
-  }
-  .progress-fill-bar.present-col { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
-  .progress-fill-bar.qa-col { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
-  .progress-fill-bar.warning { background: #ff8c00 !important; box-shadow: 0 0 8px #ff8c00 !important; }
-  .progress-fill-bar.danger { background: var(--red) !important; box-shadow: 0 0 8px var(--red) !important; }
+  .progress-bar { height:3px; background:var(--surface2); margin-bottom:22px; position:relative; overflow:hidden; }
+  .progress-fill { height:100%; transition:width 1s linear,background 0.5s; background:var(--amber); box-shadow:0 0 8px var(--amber); }
+  .progress-fill.qa-phase { background:var(--blue); box-shadow:0 0 8px var(--blue); }
+  .progress-fill.warning  { background:#ff8c00; box-shadow:0 0 8px #ff8c00; }
+  .progress-fill.danger   { background:var(--red); box-shadow:0 0 8px var(--red); }
 
-  .timer-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .timer-controls { display:flex; gap:10px; flex-wrap:wrap; }
 
-  .breakout-warning {
-    display: none; align-items: center; gap: 10px;
-    background: rgba(255,59,59,0.08); border: 1px solid rgba(255,59,59,0.3);
-    padding: 12px 16px; margin-bottom: 20px; animation: warn-pulse 1s infinite;
-  }
-  .breakout-warning.visible { display: flex; }
-  @keyframes warn-pulse { 0%,100%{border-color:rgba(255,59,59,0.3)} 50%{border-color:rgba(255,59,59,0.8)} }
-  .warning-icon { color: var(--red); font-size: 18px; animation: flicker 0.5s infinite; }
-  .warning-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.15em; color: var(--red); }
+  .breakout-warning { display:none; align-items:center; gap:10px; background:rgba(255,59,59,0.07); border:1px solid rgba(255,59,59,0.3); padding:10px 16px; margin-bottom:18px; animation:warn-pulse 1s ease-in-out infinite; }
+  .breakout-warning.visible { display:flex; }
+  @keyframes warn-pulse { 0%,100%{border-color:rgba(255,59,59,0.3)} 50%{border-color:rgba(255,59,59,0.75)} }
+  .warning-text { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--red); }
 
   /* ROSTER */
-  .roster-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .roster-title { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.3em; color: var(--text-dim); }
-  .roster-list { display: flex; flex-direction: column; gap: 4px; }
+  .roster-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .roster-title  { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em; color:var(--text-dim); }
+  .roster-list   { display:flex; flex-direction:column; gap:4px; }
 
-  .roster-item {
-    display: flex; align-items: center;
-    padding: 13px 12px 13px 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-left: 3px solid transparent; transition: all 0.2s;
-    gap: 8px;
-  }
-  .roster-item.waiting { border-left-color: var(--text-dim); }
-  .roster-item.active { border-left-color: var(--amber); background: rgba(245,166,35,0.04); }
-  .roster-item.qa-mode { border-left-color: var(--blue); background: rgba(77,166,255,0.04); }
-  .roster-item.done { border-left-color: var(--green); opacity: 0.6; }
-  .roster-item.done .person-name { text-decoration: line-through; text-decoration-color: var(--text-dim); }
-  .roster-item.dragging { opacity: 0.35; border-style: dashed; }
-  .roster-item.drag-over { border-color: var(--amber) !important; border-style: solid !important; }
+  .roster-item { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-left:3px solid transparent; transition:all 0.2s; gap:8px; }
+  .roster-item.waiting  { border-left-color:var(--text-dim); }
+  .roster-item.present  { border-left-color:var(--amber); background:rgba(245,166,35,0.04); }
+  .roster-item.qa       { border-left-color:var(--blue);  background:rgba(77,166,255,0.04); }
+  .roster-item.done     { border-left-color:var(--green); opacity:0.6; }
+  .roster-item.done .person-name { text-decoration:line-through; text-decoration-color:var(--text-dim); }
 
-  .drag-handle {
-    color: var(--text-dim); cursor: grab; font-size: 14px;
-    padding: 2px 2px; user-select: none; flex-shrink: 0;
-    letter-spacing: -1px; line-height: 1;
-    opacity: 0.5; transition: opacity 0.15s;
-  }
-  .drag-handle:hover { opacity: 1; color: var(--amber); }
-  .drag-handle:active { cursor: grabbing; }
-  .roster-item.done .drag-handle,
-  .roster-item.active .drag-handle,
-  .roster-item.qa-mode .drag-handle { opacity: 0; pointer-events: none; cursor: default; }
+  .roster-left { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+  .roster-num  { font-family:'Orbitron',monospace; font-size:10px; color:var(--text-dim); min-width:22px; text-align:right; flex-shrink:0; }
+  .roster-item.present .roster-num { color:var(--amber); }
+  .roster-item.qa      .roster-num { color:var(--blue); }
+  .roster-item.done    .roster-num { color:var(--green); }
 
-  .roster-num {
-    font-family: 'Orbitron', monospace; font-size: 10px;
-    color: var(--text-dim); width: 20px; text-align: right; flex-shrink: 0;
-  }
-  .roster-item.active .roster-num { color: var(--amber); }
-  .roster-item.done .roster-num { color: var(--green); }
+  .person-name { font-family:'IBM Plex Mono',monospace; font-size:14px; color:#fff; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .person-name.hidden { display:none; }
+  .edit-input { flex:1; background:var(--bg); border:1px solid var(--amber); color:#fff; font-family:'IBM Plex Mono',monospace; font-size:14px; padding:3px 10px; outline:none; font-weight:500; display:none; min-width:0; }
+  .edit-input.visible { display:block; }
 
-  .person-name {
-    font-family: 'IBM Plex Mono', monospace; font-size: 15px;
-    color: #fff; font-weight: 500; letter-spacing: 0.02em;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    flex: 1; min-width: 0;
-  }
+  .roster-right { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+  .roster-badges { display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
 
-  .person-name-input {
-    background: var(--bg); border: 1px solid var(--amber);
-    color: #fff; font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px; padding: 4px 8px; outline: none;
-    width: 160px; max-width: 100%; flex: 1;
-  }
+  .badge { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:0.12em; padding:3px 7px; }
+  .badge-presenting { background:var(--amber-glow); color:var(--amber); border:1px solid var(--amber-dim); animation:pulse-dot 1.5s infinite; }
+  .badge-qa         { background:var(--blue-glow);  color:var(--blue);  border:1px solid rgba(77,166,255,0.4); animation:pulse-dot 1.5s infinite; }
+  .badge-done       { background:var(--green-glow); color:var(--green); border:1px solid rgba(57,211,83,0.3); }
+  .badge-breakout   { background:var(--red-glow);   color:var(--red);   border:1px solid rgba(255,59,59,0.4); animation:warn-pulse 2s infinite; }
+  .badge-waiting    { color:var(--text-dim); border:1px solid var(--border); }
 
-  .roster-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-  .roster-badges { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .queue-actions { display:flex; align-items:center; gap:3px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
+  .roster-item:hover .queue-actions { opacity:1; }
+  .edit-actions { display:none; align-items:center; gap:3px; flex-shrink:0; }
+  .edit-actions.visible { display:flex; }
 
-  .badge {
-    font-family: 'Share Tech Mono', monospace; font-size: 9px;
-    letter-spacing: 0.12em; padding: 3px 7px; border-radius: 2px;
-  }
-  .badge-on-air { background: var(--amber-glow); color: var(--amber); border: 1px solid var(--amber-dim); animation: pulse-dot 1.5s infinite; }
-  .badge-qa { background: var(--blue-glow); color: var(--blue); border: 1px solid rgba(77,166,255,0.4); animation: pulse-dot 1.5s infinite; }
-  .badge-done { background: var(--green-glow); color: var(--green); border: 1px solid rgba(57,211,83,0.3); }
-  .badge-breakout { background: var(--red-glow); color: var(--red); border: 1px solid rgba(255,59,59,0.4); animation: warn-pulse 2s infinite; }
-  .badge-waiting { color: var(--text-dim); border: 1px solid var(--border); }
+  .icon-btn { background:var(--surface2); border:1px solid var(--border); color:var(--text-dim); width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; transition:all 0.15s; flex-shrink:0; line-height:1; }
+  .icon-btn:hover { border-color:var(--amber); color:var(--amber); }
+  .icon-btn.del:hover { border-color:var(--red); color:var(--red); }
+  .icon-btn:disabled { opacity:0.2; cursor:not-allowed; pointer-events:none; }
 
-  .queue-actions { display: flex; gap: 3px; }
-  .icon-btn {
-    background: transparent; border: 1px solid var(--border);
-    color: var(--text-dim); width: 26px; height: 26px; cursor: pointer;
-    font-size: 12px; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; flex-shrink: 0;
-  }
-  .icon-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
-  .icon-btn.del:hover { border-color: var(--red); color: var(--red); background: var(--red-glow); }
-  .icon-btn:disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+  .start-next-area { margin-top:16px; display:none; justify-content:center; }
+  .start-next-area.visible { display:flex; }
 
-  .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
-  .empty-state .big-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
-  .empty-state p { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.2em; line-height: 1.8; }
+  .session-complete { display:none; text-align:center; padding:40px 24px; border:1px solid rgba(57,211,83,0.25); background:rgba(57,211,83,0.03); margin-top:20px; }
+  .session-complete.visible { display:block; }
+  .session-complete h2 { font-family:'Orbitron',monospace; font-size:20px; font-weight:700; color:var(--green); margin-bottom:8px; letter-spacing:0.1em; }
+  .session-complete p  { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.2em; }
 
-  .start-next-area { margin-top: 16px; display: none; justify-content: center; }
-  .start-next-area.visible { display: flex; }
+  .empty-state { text-align:center; padding:48px 24px; color:var(--text-dim); }
+  .empty-state .big-icon { font-size:30px; margin-bottom:12px; opacity:0.35; }
+  .empty-state p { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:0.2em; line-height:1.9; }
 
-  .session-complete {
-    display: none; text-align: center; padding: 40px 24px;
-    border: 1px solid rgba(57,211,83,0.3); background: rgba(57,211,83,0.03); margin-top: 24px;
-  }
-  .session-complete.visible { display: block; }
-  .session-complete h2 { font-family: 'Orbitron', monospace; font-size: 20px; font-weight: 700; color: var(--green); margin-bottom: 8px; letter-spacing: 0.1em; }
-  .session-complete p { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--text-dim); letter-spacing: 0.2em; }
+  #conn-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:9999; flex-direction:column; gap:16px; }
+  #conn-overlay .spin { width:38px; height:38px; border:2px solid var(--border); border-top-color:var(--amber); border-radius:50%; animation:spin 0.8s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  #conn-overlay p { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.3em; color:var(--text-dim); }
 
-  #conn-overlay {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 9999; flex-direction: column; gap: 16px;
-  }
-  #conn-overlay .spin {
-    width: 40px; height: 40px;
-    border: 2px solid var(--border); border-top-color: var(--amber);
-    border-radius: 50%; animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  #conn-overlay p { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.3em; color: var(--text-dim); }
+  .toast { position:fixed; bottom:28px; right:28px; background:var(--surface2); border:1px solid var(--border-bright); padding:11px 18px; font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--amber); z-index:10000; transform:translateY(70px); opacity:0; transition:all 0.28s; max-width:300px; }
+  .toast.show { transform:translateY(0); opacity:1; }
 
-  .toast {
-    position: fixed; bottom: 32px; right: 32px;
-    background: var(--surface2); border: 1px solid var(--border-bright);
-    padding: 12px 20px; font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; letter-spacing: 0.15em; color: var(--amber);
-    z-index: 10000; transform: translateY(80px); opacity: 0;
-    transition: all 0.3s; max-width: 280px;
-  }
-  .toast.show { transform: translateY(0); opacity: 1; }
-
-  @media (max-width: 600px) {
-    .timer-display { font-size: 52px; }
-    .join-row { flex-direction: column; }
-    .timer-controls { flex-direction: column; }
-    .timer-controls .btn { width: 100%; text-align: center; }
-    .timer-config { gap: 8px; }
+  @media (max-width:600px) {
+    .timer-display { font-size:52px; }
+    .join-row { flex-direction:column; }
+    .timer-controls { flex-direction:column; }
+    .queue-actions { opacity:1; }
   }
 </style>
 </head>
@@ -368,7 +225,7 @@
 
 <div id="conn-overlay">
   <div class="spin"></div>
-  <p>INITIALIZING SESSION</p>
+  <p>CONNECTING</p>
 </div>
 
 <div class="app">
@@ -376,78 +233,77 @@
     <div class="header-left">
       <div class="header-tag">// MID-SPRINT STANDUP</div>
       <h1>STAND<span>UP</span></h1>
-      <div class="status-dot"><div class="dot"></div><span id="live-count">0 IN QUEUE</span></div>
+      <div class="status-dot">
+        <div class="dot"></div>
+        <span id="live-count">0 IN QUEUE</span>
+      </div>
     </div>
-    <div class="participant-count">
-      <span id="header-count">0</span>
-      <span>REMAINING</span>
+    <div>
+      <div class="participant-count">
+        <span id="header-count">0</span>
+        <span>REMAINING</span>
+      </div>
     </div>
   </header>
 
   <div class="join-section">
+    <div class="section-label">IDENTIFY</div>
     <div class="join-row">
-      <input type="text" id="name-input" placeholder="enter your name..." maxlength="32" autocomplete="off" autocorrect="off">
-      <button class="btn btn-amber" id="join-btn">JOIN QUEUE</button>
+      <input type="text" id="name-input" placeholder="enter your name to join the queue..." maxlength="32" autocomplete="off">
+      <button class="btn btn-amber" id="join-btn">JOIN</button>
     </div>
     <div class="timer-config">
       <label>PRESENT TIME</label>
-      <div class="timer-stepper">
-        <button id="dec-present">−</button>
-        <div class="val" id="present-val">5</div>
-        <button id="inc-present">+</button>
+      <div class="timer-group">
+        <div class="timer-stepper">
+          <button id="dec-present">−</button>
+          <div class="val" id="present-val">5</div>
+          <button id="inc-present">+</button>
+        </div>
+        <label>MIN</label>
       </div>
-      <label>MIN</label>
-      <label style="margin-left:8px">Q&amp;A TIME</label>
-      <div class="timer-stepper">
-        <button id="dec-qa">−</button>
-        <div class="val" id="qa-val">5</div>
-        <button id="inc-qa">+</button>
+      <span class="timer-sep">//</span>
+      <label>Q&amp;A TIME</label>
+      <div class="timer-group">
+        <div class="timer-stepper">
+          <button id="dec-qa">−</button>
+          <div class="val" id="qa-val">5</div>
+          <button id="inc-qa">+</button>
+        </div>
+        <label>MIN</label>
       </div>
-      <label>MIN</label>
     </div>
   </div>
 
-  <!-- Active timer panel -->
   <div class="timer-panel" id="timer-panel">
+    <div class="section-label">ACTIVE SPEAKER</div>
+    <div class="phase-strip">
+      <div class="phase-pill" id="pill-present"><span class="phase-dot"></span>PRESENT TIME</div>
+      <div class="phase-pill" id="pill-qa"><span class="phase-dot"></span>Q&amp;A TIME</div>
+    </div>
     <div class="breakout-warning" id="breakout-warning">
-      <span class="warning-icon">⚠</span>
+      <span style="color:var(--red);font-size:16px">⚠</span>
       <span class="warning-text">OVER TIME — BREAKOUT ROOM RECOMMENDED</span>
     </div>
-
-    <div class="phase-pill present" id="phase-pill">
-      <div class="phase-dot"></div>
-      <span id="phase-text">PRESENT TIME</span>
-    </div>
-
     <div class="active-speaker-name">
       <span class="index" id="speaker-index">SPEAKER 1 OF 1</span>
       <span id="speaker-name-display">—</span>
     </div>
-
+    <div class="phase-label present" id="phase-label">PRESENT TIME</div>
     <div class="timer-display" id="timer-display">05:00</div>
-
-    <div class="progress-track">
-      <div class="progress-segment" id="seg-present"><div class="progress-fill-bar present-col" id="fill-present"></div></div>
-      <div class="progress-segment hidden" id="seg-qa"><div class="progress-fill-bar qa-col" id="fill-qa"></div></div>
-    </div>
-
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     <div class="timer-controls">
       <button class="btn btn-amber" id="start-btn">▶ START PRESENT</button>
-      <button class="btn btn-blue" id="qa-btn" style="display:none">◆ START Q&amp;A</button>
-      <button class="btn btn-green" id="done-btn" disabled>✓ DONE</button>
+      <button class="btn btn-blue"  id="next-phase-btn" style="display:none">→ END PRESENT / START Q&amp;A</button>
+      <button class="btn btn-green" id="done-btn"       style="display:none">✓ DONE</button>
     </div>
   </div>
 
   <div class="roster-header">
     <div class="roster-title">// SPEAKER QUEUE</div>
-    <button class="btn btn-ghost" id="reset-btn" style="font-size:9px;padding:6px 12px;display:none">RESET SESSION</button>
+    <button class="btn btn-ghost" id="reset-btn" style="font-size:9px;padding:5px 12px;display:none">RESET SESSION</button>
   </div>
-  <div class="roster-list" id="roster-list">
-    <div class="empty-state">
-      <div class="big-icon">◈</div>
-      <p>NO SPEAKERS QUEUED<br>ENTER YOUR NAME ABOVE TO JOIN</p>
-    </div>
-  </div>
+  <div class="roster-list" id="roster-list"></div>
 
   <div class="start-next-area" id="start-next-area">
     <button class="btn btn-amber" id="start-next-btn">▶ START STANDUP</button>
@@ -462,346 +318,362 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ================================================================
-// STATE
-// ================================================================
-const STORAGE_KEY = 'standup-v4';
-const POLL_MS = 2000;
+// ─────────────────────────────────────────────────────────────────────────────
+// GUN.JS REAL-TIME SYNC
+// Uses public Gun relay servers — no account, no config needed.
+// All devices on the same URL share the same session key automatically.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// phase: 'idle' | 'presenting' | 'qa'
-let S = {
-  speakers: [],   // [{id, name, status:'waiting'|'active'|'done', breakout:false}]
+// Derive a stable session key from the page's origin + pathname
+// so every deployment gets its own isolated session.
+const SESSION_KEY = 'standup_' + (location.hostname + location.pathname).replace(/[^a-zA-Z0-9]/g, '_');
+
+const gun = Gun([
+  'https://gun-manhattan.herokuapp.com/gun',
+  'https://gun-us.herokuapp.com/gun',
+  'https://gundb-relay-mlmedia.glitch.me/gun'
+]);
+
+const db = gun.get(SESSION_KEY);
+
+// ─── LOCAL STATE (rendered from Gun data) ────────────────────────────────────
+// We keep a local mirror so we can render without waiting for Gun round-trips.
+// Structure:
+//   state.speakers  = [ { id, name, status:'waiting'|'present'|'qa'|'done', breakout, order } ]
+//   state.presentMins, state.qaMins
+//   state.phase     = 'present' | 'qa'
+//   state.timerRunning
+//   state.activeStartedAt  (ms timestamp or null)
+
+let state = {
+  speakers: [],
   presentMins: 5,
   qaMins: 5,
-  phase: 'idle',
-  presentStartedAt: null,
-  qaStartedAt: null,
+  phase: 'present',
+  timerRunning: false,
+  activeStartedAt: null,
 };
 
 let timerInterval = null;
 let secsLeft = 0;
 let totalSecs = 0;
-let lastHash = '';
-let dragId = null;
+let gunReady = false;
 
-// DOM
+// ─── DOM ─────────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-const nameInput   = $('name-input');
-const joinBtn     = $('join-btn');
-const presentValEl= $('present-val');
-const qaValEl     = $('qa-val');
-const timerPanel  = $('timer-panel');
-const timerDisp   = $('timer-display');
-const fillPresent = $('fill-present');
-const fillQa      = $('fill-qa');
-const segQa       = $('seg-qa');
-const segPresent  = $('seg-present');
-const activeNameEl= $('speaker-name-display');
-const spkIndex    = $('speaker-index');
-const startBtn    = $('start-btn');
-const qaBtn       = $('qa-btn');
-const doneBtn     = $('done-btn');
-const phasePill   = $('phase-pill');
-const phaseText   = $('phase-text');
-const rosterList  = $('roster-list');
+const nameInput     = $('name-input');
+const joinBtn       = $('join-btn');
+const presentValEl  = $('present-val');
+const qaValEl       = $('qa-val');
+const timerPanel    = $('timer-panel');
+const timerDisplay  = $('timer-display');
+const progressFill  = $('progress-fill');
+const activeNameEl  = $('speaker-name-display');
+const speakerIdx    = $('speaker-index');
+const startBtn      = $('start-btn');
+const nextPhaseBtn  = $('next-phase-btn');
+const doneBtn       = $('done-btn');
+const rosterList    = $('roster-list');
 const startNextArea = $('start-next-area');
 const startNextBtn  = $('start-next-btn');
 const sessionComp   = $('session-complete');
-const brkWarn       = $('breakout-warning');
+const breakoutWarn  = $('breakout-warning');
 const liveCount     = $('live-count');
 const headerCount   = $('header-count');
 const resetBtn      = $('reset-btn');
+const phaseLabel    = $('phase-label');
+const pillPresent   = $('pill-present');
+const pillQa        = $('pill-qa');
+const toast         = $('toast');
 const connOverlay   = $('conn-overlay');
-const toastEl       = $('toast');
 
-// ================================================================
-// STORAGE
-// ================================================================
-async function load() {
-  try { const r = await window.storage.get(STORAGE_KEY, true); if (r?.value) return JSON.parse(r.value); } catch(e){}
-  return null;
-}
-async function save() {
-  try { await window.storage.set(STORAGE_KEY, JSON.stringify(S), true); } catch(e){}
-}
+// ─── GUN SYNC ────────────────────────────────────────────────────────────────
+// We store the entire state as a flat JSON string under one key.
+// Gun handles the real-time push to all connected clients.
 
-// ================================================================
-// BOOT
-// ================================================================
-async function init() {
-  const saved = await load();
-  if (saved) {
-    S = saved;
-    presentValEl.textContent = S.presentMins || 5;
-    qaValEl.textContent = S.qaMins || 5;
-  }
-  connOverlay.style.display = 'none';
-  syncTimer();
-  render();
-  setInterval(poll, POLL_MS);
+let ignoreNextUpdate = false; // prevent echo loop
+
+function pushState() {
+  // Serialise speakers array as JSON string (Gun can't store nested arrays natively)
+  const payload = JSON.stringify({
+    speakers: state.speakers,
+    presentMins: state.presentMins,
+    qaMins: state.qaMins,
+    phase: state.phase,
+    timerRunning: state.timerRunning,
+    activeStartedAt: state.activeStartedAt,
+  });
+  ignoreNextUpdate = true;
+  db.get('data').put({ v: payload });
 }
 
-async function poll() {
-  const remote = await load();
-  if (!remote) return;
-  const h = JSON.stringify(remote);
-  if (h === lastHash) return;
-  lastHash = h;
-  const prevPhase = S.phase;
-  S = remote;
-  presentValEl.textContent = S.presentMins || 5;
-  qaValEl.textContent = S.qaMins || 5;
-  if (S.phase !== prevPhase || !timerInterval) syncTimer();
-  render();
+function initGun() {
+  db.get('data').on(function(data) {
+    if (!data || !data.v) {
+      // No data yet — just show UI
+      if (!gunReady) { gunReady = true; connOverlay.style.display = 'none'; render(); }
+      return;
+    }
+
+    if (ignoreNextUpdate) { ignoreNextUpdate = false; return; }
+
+    let remote;
+    try { remote = JSON.parse(data.v); } catch(e) { return; }
+
+    if (!gunReady) {
+      gunReady = true;
+      connOverlay.style.display = 'none';
+    }
+
+    // Merge remote into local state
+    const prevActiveId = (state.speakers.find(s => s.status==='present'||s.status==='qa') || {}).id;
+    const prevRunning  = state.timerRunning;
+
+    state = remote;
+    if (!state.speakers) state.speakers = [];
+
+    presentValEl.textContent = state.presentMins || 5;
+    qaValEl.textContent      = state.qaMins || 5;
+
+    const newActive    = state.speakers.find(s => s.status==='present'||s.status==='qa');
+    const newActiveId  = newActive ? newActive.id : null;
+    const speakerChanged = newActiveId !== prevActiveId;
+    const timerStarted   = state.timerRunning && !prevRunning;
+
+    if (speakerChanged || timerStarted) {
+      syncTimerFromState();
+    }
+
+    render();
+  });
+
+  // Timeout — if Gun hasn't responded in 4s, show UI anyway (offline mode)
+  setTimeout(() => {
+    if (!gunReady) {
+      gunReady = true;
+      connOverlay.style.display = 'none';
+      showToast('Working offline — sync unavailable');
+      render();
+    }
+  }, 4000);
 }
 
-// ================================================================
-// TIMER SYNC
-// ================================================================
-function syncTimer() {
-  stopTimer();
-  const phase = S.phase;
-  if (phase === 'presenting' && S.presentStartedAt) {
-    const total = (S.presentMins||5) * 60;
-    const elapsed = Math.floor((Date.now() - new Date(S.presentStartedAt).getTime()) / 1000);
-    const rem = total - elapsed;
-    totalSecs = total;
-    if (rem > 0) { secsLeft = rem; startCountdown('presenting'); }
-    else { secsLeft = 0; setDisplay(0, total, 'presenting'); }
-  } else if (phase === 'qa' && S.qaStartedAt) {
-    const total = (S.qaMins||5) * 60;
-    const elapsed = Math.floor((Date.now() - new Date(S.qaStartedAt).getTime()) / 1000);
-    const rem = total - elapsed;
-    totalSecs = total;
-    if (rem > 0) { secsLeft = rem; startCountdown('qa'); }
-    else { secsLeft = 0; setDisplay(0, total, 'qa'); }
-  } else {
-    // idle: show present time
-    const t = (S.presentMins||5) * 60;
-    setDisplay(t, t, 'idle');
-  }
+// ─── TIMER ───────────────────────────────────────────────────────────────────
+function syncTimerFromState() {
+  clearTimer();
+  const active = state.speakers.find(s => s.status==='present'||s.status==='qa');
+  if (!active || !state.timerRunning || !state.activeStartedAt) return;
+
+  const mins  = state.phase==='qa' ? (state.qaMins||5) : (state.presentMins||5);
+  const total = mins * 60;
+  const elapsed = Math.floor((Date.now() - state.activeStartedAt) / 1000);
+  totalSecs = total;
+  secsLeft  = Math.max(0, total - elapsed);
+
+  if (secsLeft > 0) runTimer();
+  else { updateDisplay(0, total); onExpired(); }
 }
 
-function startCountdown(phase) {
+function runTimer() {
   if (timerInterval) return;
   timerInterval = setInterval(() => {
-    secsLeft = Math.max(0, secsLeft - 1);
-    setDisplay(secsLeft, totalSecs, phase);
-    if (secsLeft <= 0) {
-      stopTimer();
-      onExpired(phase);
-    }
+    secsLeft--;
+    updateDisplay(secsLeft, totalSecs);
+    if (secsLeft <= 0) { clearInterval(timerInterval); timerInterval = null; onExpired(); }
   }, 1000);
 }
 
-function stopTimer() {
+function clearTimer() {
   if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 }
 
-function onExpired(phase) {
-  if (phase === 'presenting') {
-    // Auto-roll into Q&A
-    doStartQA();
-  } else if (phase === 'qa') {
-    doBreakout();
+function onExpired() {
+  const idx = state.speakers.findIndex(s => s.status==='present'||s.status==='qa');
+  if (idx !== -1 && !state.speakers[idx].breakout) {
+    state.speakers[idx].breakout = true;
+    pushState();
   }
-}
-
-async function doBreakout() {
-  const idx = S.speakers.findIndex(s => s.status === 'active');
-  if (idx !== -1 && !S.speakers[idx].breakout) {
-    S.speakers[idx].breakout = true;
-    await save();
-  }
-  brkWarn.classList.add('visible');
-  toast('⚠ BREAKOUT ROOM RECOMMENDED');
+  breakoutWarn.classList.add('visible');
+  showToast('⚠ TIME UP — BREAKOUT ROOM RECOMMENDED');
   render();
 }
 
-function setDisplay(sec, total, phase) {
+function updateDisplay(sec, total) {
   const s = Math.max(0, sec);
-  const mm = String(Math.floor(s/60)).padStart(2,'0');
-  const ss = String(s%60).padStart(2,'0');
-  timerDisp.textContent = `${mm}:${ss}`;
+  timerDisplay.textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  progressFill.style.width = (total > 0 ? (s/total)*100 : 0) + '%';
 
-  const ratio = total > 0 ? s/total : 1;
-
-  // Progress bars
-  if (phase === 'presenting' || phase === 'idle') {
-    fillPresent.style.transform = `scaleX(${ratio})`;
-    timerDisp.classList.remove('qa-col');
-  } else if (phase === 'qa') {
-    fillQa.style.transform = `scaleX(${ratio})`;
-    timerDisp.classList.add('qa-col');
-  }
-
-  // Colour warnings
-  timerDisp.classList.remove('warning','danger');
-  fillPresent.classList.remove('warning','danger');
-  fillQa.classList.remove('warning','danger');
-
-  if (phase !== 'idle') {
-    const fill = phase === 'qa' ? fillQa : fillPresent;
-    if (ratio <= 0) { timerDisp.classList.add('danger'); fill.classList.add('danger'); }
-    else if (ratio <= 0.25) { timerDisp.classList.add('warning'); fill.classList.add('warning'); }
-  }
+  const ratio = s / total;
+  const isQa  = state.phase === 'qa';
+  timerDisplay.classList.remove('warning','danger','qa-phase');
+  progressFill.classList.remove('warning','danger','qa-phase');
+  if      (ratio <= 0)    { timerDisplay.classList.add('danger');  progressFill.classList.add('danger'); }
+  else if (ratio <= 0.25) { timerDisplay.classList.add('warning'); progressFill.classList.add('warning'); }
+  else if (isQa)          { timerDisplay.classList.add('qa-phase');progressFill.classList.add('qa-phase'); }
 }
 
-// ================================================================
-// ACTIONS
-// ================================================================
-async function doJoin() {
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function joinQueue() {
   const name = nameInput.value.trim();
   if (!name) return;
-  if (S.speakers.find(s => s.name.toLowerCase() === name.toLowerCase())) { toast('Name already in queue'); return; }
-  S.speakers.push({ id: Date.now()+''+Math.floor(Math.random()*99999), name, status:'waiting', breakout:false });
+  if (state.speakers.find(s => s.name.toLowerCase() === name.toLowerCase())) { showToast('Name already in queue'); return; }
+  state.speakers.push({ id: Date.now() + '_' + Math.random().toString(36).slice(2), name, status:'waiting', breakout:false, order: state.speakers.length });
   nameInput.value = '';
-  await save();
-  render();
-  toast(`${name} joined the queue`);
+  pushState(); render(); showToast(`${name} joined`);
 }
 
-async function doActivateNext() {
-  const idx = S.speakers.findIndex(s => s.status === 'waiting');
+function activateSpeaker(idx) {
+  state.speakers[idx].status = 'present';
+  state.phase = 'present'; state.timerRunning = false; state.activeStartedAt = null;
+  pushState(); clearTimer();
+  totalSecs = (state.presentMins||5)*60; secsLeft = totalSecs;
+  updateDisplay(secsLeft, totalSecs);
+  breakoutWarn.classList.remove('visible');
+  render();
+}
+
+function startTimer() {
+  clearTimer();
+  state.timerRunning = true; state.activeStartedAt = Date.now();
+  pushState();
+  const mins = state.phase==='qa' ? (state.qaMins||5) : (state.presentMins||5);
+  totalSecs = mins * 60; secsLeft = totalSecs;
+  breakoutWarn.classList.remove('visible');
+  render(); runTimer();
+}
+
+function goToQA() {
+  clearTimer();
+  const idx = state.speakers.findIndex(s => s.status==='present');
   if (idx === -1) return;
-  S.speakers[idx].status = 'active';
-  S.phase = 'idle';
-  S.presentStartedAt = null;
-  S.qaStartedAt = null;
-  stopTimer();
-  const t = (S.presentMins||5)*60;
-  setDisplay(t, t, 'idle');
-  brkWarn.classList.remove('visible');
-  await save();
+  state.speakers[idx].status = 'qa';
+  state.speakers[idx].breakout = false;
+  state.phase = 'qa'; state.timerRunning = false; state.activeStartedAt = null;
+  pushState();
+  totalSecs = (state.qaMins||5)*60; secsLeft = totalSecs;
+  updateDisplay(secsLeft, totalSecs);
+  breakoutWarn.classList.remove('visible');
   render();
 }
 
-async function doStartPresent() {
-  let active = S.speakers.find(s => s.status === 'active');
-  if (!active) {
-    const idx = S.speakers.findIndex(s => s.status === 'waiting');
-    if (idx === -1) return;
-    S.speakers[idx].status = 'active';
-    active = S.speakers[idx];
-  }
-  stopTimer();
-  S.phase = 'presenting';
-  S.presentStartedAt = new Date().toISOString();
-  S.qaStartedAt = null;
-  brkWarn.classList.remove('visible');
-  await save();
-  secsLeft = (S.presentMins||5)*60;
-  totalSecs = secsLeft;
-  render();
-  startCountdown('presenting');
+function markDone() {
+  clearTimer();
+  const idx = state.speakers.findIndex(s => s.status==='present'||s.status==='qa');
+  if (idx === -1) return;
+  state.speakers[idx].status = 'done';
+  state.timerRunning = false; state.activeStartedAt = null; state.phase = 'present';
+  breakoutWarn.classList.remove('visible');
+  pushState(); render();
 }
 
-async function doStartQA() {
-  stopTimer();
-  S.phase = 'qa';
-  S.qaStartedAt = new Date().toISOString();
-  brkWarn.classList.remove('visible');
-  await save();
-  secsLeft = (S.qaMins||5)*60;
-  totalSecs = secsLeft;
-  render();
-  startCountdown('qa');
+function startNextSpeaker() {
+  const idx = state.speakers.findIndex(s => s.status==='waiting');
+  if (idx === -1) return;
+  activateSpeaker(idx);
 }
 
-async function doDone() {
-  stopTimer();
-  const idx = S.speakers.findIndex(s => s.status === 'active');
-  if (idx !== -1) S.speakers[idx].status = 'done';
-  S.phase = 'idle';
-  S.presentStartedAt = null;
-  S.qaStartedAt = null;
-  brkWarn.classList.remove('visible');
-  await save();
-  render();
+function resetSession() {
+  clearTimer();
+  state.speakers = [];
+  state.timerRunning = false; state.activeStartedAt = null; state.phase = 'present';
+  breakoutWarn.classList.remove('visible');
+  pushState(); render();
 }
 
-async function doDelete(id) {
-  S.speakers = S.speakers.filter(s => s.id !== id);
-  await save(); render();
+// ─── QUEUE MANAGEMENT ────────────────────────────────────────────────────────
+function deleteSpeaker(id) {
+  state.speakers = state.speakers.filter(s => s.id !== id);
+  pushState(); render();
 }
 
-async function doRename(id, newName) {
-  const sp = S.speakers.find(s => s.id === id);
-  if (sp && newName.trim()) sp.name = newName.trim();
-  await save(); render();
-}
-
-async function doMove(id, dir) {
-  const arr = S.speakers;
+function moveSpeaker(id, dir) {
+  const arr = state.speakers;
   const i = arr.findIndex(s => s.id === id);
-  const j = i + dir;
-  if (j < 0 || j >= arr.length || arr[j].status !== 'waiting') return;
-  [arr[i], arr[j]] = [arr[j], arr[i]];
-  await save(); render();
+  if (i === -1) return;
+  const t = i + dir;
+  if (t < 0 || t >= arr.length) return;
+  [arr[i], arr[t]] = [arr[t], arr[i]];
+  pushState(); render();
 }
 
-async function doReset() {
-  if (!confirm('Reset session? All speakers will be cleared.')) return;
-  stopTimer();
-  S = { speakers:[], presentMins: parseInt(presentValEl.textContent)||5, qaMins: parseInt(qaValEl.textContent)||5, phase:'idle', presentStartedAt:null, qaStartedAt:null };
-  brkWarn.classList.remove('visible');
-  await save(); render();
+function startEdit(id) {
+  const item = document.querySelector(`.roster-item[data-id="${id}"]`);
+  if (!item) return;
+  item.querySelector('.person-name').classList.add('hidden');
+  const ei = item.querySelector('.edit-input');
+  ei.classList.add('visible'); ei.focus(); ei.select();
+  item.querySelector('.queue-actions').style.visibility = 'hidden';
+  item.querySelector('.edit-actions').classList.add('visible');
 }
 
-// ================================================================
-// RENDER
-// ================================================================
+function confirmEdit(id) {
+  const item = document.querySelector(`.roster-item[data-id="${id}"]`);
+  if (!item) return;
+  const newName = item.querySelector('.edit-input').value.trim();
+  if (newName) { const s = state.speakers.find(s => s.id === id); if (s) s.name = newName; pushState(); }
+  render();
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
 function render() {
-  const spk = S.speakers;
-  const active = spk.find(s => s.status === 'active');
-  const waiting = spk.filter(s => s.status === 'waiting');
-  const done = spk.filter(s => s.status === 'done');
-  const allDone = spk.length > 0 && !active && waiting.length === 0;
-  const phase = S.phase;
+  const spk     = state.speakers;
+  const active  = spk.find(s => s.status==='present'||s.status==='qa');
+  const waiting = spk.filter(s => s.status==='waiting');
+  const done    = spk.filter(s => s.status==='done');
+  const allDone = spk.length > 0 && waiting.length === 0 && !active;
 
-  liveCount.textContent = `${spk.length} IN QUEUE`;
+  liveCount.textContent   = `${spk.length} IN QUEUE`;
   headerCount.textContent = waiting.length + (active ? 1 : 0);
 
-  // TIMER PANEL
   if (active) {
     timerPanel.classList.add('visible');
-    timerPanel.classList.toggle('qa-mode', phase === 'qa');
     activeNameEl.textContent = active.name;
-    spkIndex.textContent = `SPEAKER ${done.length+1} OF ${spk.length}`;
+    speakerIdx.textContent   = `SPEAKER ${done.length+1} OF ${spk.length}`;
 
-    // Phase pill
-    phasePill.className = 'phase-pill ' + (phase === 'qa' ? 'qa' : 'present');
-    phaseText.textContent = phase === 'qa' ? 'Q&A / COMMENT TIME' : 'PRESENT TIME';
+    const phase = active.status; // 'present' | 'qa'
+    pillPresent.className = 'phase-pill';
+    pillQa.className      = 'phase-pill';
+    if (phase === 'present') pillPresent.classList.add('cur-present');
+    else { pillPresent.classList.add('done-phase'); pillQa.classList.add('cur-qa'); }
 
-    // Progress segments
-    segQa.classList.toggle('hidden', phase !== 'qa');
+    phaseLabel.textContent = phase === 'qa' ? 'Q&A TIME' : 'PRESENT TIME';
+    phaseLabel.className   = `phase-label ${phase === 'qa' ? 'qa' : 'present'}`;
 
-    if (phase === 'idle') {
-      startBtn.style.display = ''; startBtn.disabled = false;
-      qaBtn.style.display = 'none';
-      doneBtn.disabled = false;
-      const t = (S.presentMins||5)*60;
-      setDisplay(t, t, 'idle');
-      fillPresent.style.transform = 'scaleX(1)';
-    } else if (phase === 'presenting') {
-      startBtn.style.display = 'none';
-      qaBtn.style.display = ''; qaBtn.disabled = false;
-      doneBtn.disabled = false;
-    } else if (phase === 'qa') {
-      startBtn.style.display = 'none';
-      qaBtn.style.display = 'none';
-      doneBtn.disabled = false;
+    if (!state.timerRunning) {
+      const mins = phase === 'qa' ? (state.qaMins||5) : (state.presentMins||5);
+      updateDisplay(mins*60, mins*60);
     }
 
-    if (active.breakout) brkWarn.classList.add('visible');
+    // Buttons
+    if (!state.timerRunning) {
+      if (phase === 'present') {
+        startBtn.textContent = '▶ START PRESENT'; startBtn.className = 'btn btn-amber'; startBtn.style.display = '';
+        nextPhaseBtn.textContent = '→ SKIP TO Q&A'; nextPhaseBtn.style.display = '';
+        doneBtn.style.display = 'none';
+      } else {
+        startBtn.textContent = '▶ START Q&A'; startBtn.className = 'btn btn-blue'; startBtn.style.display = '';
+        nextPhaseBtn.style.display = 'none';
+        doneBtn.textContent = '✓ DONE'; doneBtn.style.display = '';
+      }
+    } else {
+      startBtn.style.display = 'none';
+      if (phase === 'present') {
+        nextPhaseBtn.textContent = '→ END PRESENT / START Q&A'; nextPhaseBtn.style.display = '';
+        doneBtn.style.display = 'none';
+      } else {
+        nextPhaseBtn.style.display = 'none';
+        doneBtn.textContent = '✓ DONE'; doneBtn.style.display = '';
+      }
+    }
+
+    if (active.breakout) breakoutWarn.classList.add('visible');
   } else {
     timerPanel.classList.remove('visible');
   }
 
-  // START NEXT
-  if (!active && waiting.length > 0 && !allDone) {
+  if (!active && waiting.length > 0) {
     startNextArea.classList.add('visible');
-    startNextBtn.textContent = done.length === 0 ? '▶ START STANDUP' : '▶ NEXT SPEAKER';
+    startNextBtn.textContent = done.length === 0 ? '▶ START STANDUP' : '▶ START NEXT SPEAKER';
   } else {
     startNextArea.classList.remove('visible');
   }
@@ -809,7 +681,6 @@ function render() {
   sessionComp.classList.toggle('visible', allDone);
   resetBtn.style.display = spk.length > 0 ? '' : 'none';
 
-  // ROSTER
   if (spk.length === 0) {
     rosterList.innerHTML = `<div class="empty-state"><div class="big-icon">◈</div><p>NO SPEAKERS QUEUED<br>ENTER YOUR NAME ABOVE TO JOIN</p></div>`;
     return;
@@ -817,133 +688,87 @@ function render() {
 
   rosterList.innerHTML = '';
   spk.forEach((s, i) => {
-    const isQaActive = s.status === 'active' && phase === 'qa';
-    const cssClass = isQaActive ? 'qa-mode' : s.status;
-    const canEdit = s.status === 'waiting';
+    const isActive = s.status === 'present' || s.status === 'qa';
+    const canAct   = !isActive && s.status !== 'done';
+    const div      = document.createElement('div');
+    div.className  = `roster-item ${s.status}`;
+    div.dataset.id = s.id;
 
     let badges = '';
-    if (s.status === 'active' && phase !== 'qa') badges += `<span class="badge badge-on-air">ON AIR</span>`;
-    if (isQaActive) badges += `<span class="badge badge-qa">Q&amp;A</span>`;
-    if (s.status === 'done') badges += `<span class="badge badge-done">✓ DONE</span>`;
-    if (s.breakout) badges += `<span class="badge badge-breakout">⚠ BREAKOUT</span>`;
-    if (s.status === 'waiting') badges += `<span class="badge badge-waiting">WAITING</span>`;
-
-    // Determine if up/down buttons should be disabled
-    const prevIsWaiting = i > 0 && spk[i-1].status === 'waiting';
-    const nextIsWaiting = i < spk.length-1 && spk[i+1]?.status === 'waiting';
-
-    const div = document.createElement('div');
-    div.className = `roster-item ${cssClass}`;
-    div.dataset.id = s.id;
-    div.draggable = canEdit;
+    if      (s.status==='present') badges += `<span class="badge badge-presenting">PRESENTING</span>`;
+    else if (s.status==='qa')      badges += `<span class="badge badge-qa">Q&amp;A</span>`;
+    else if (s.status==='done')    badges += `<span class="badge badge-done">✓ DONE</span>`;
+    else                           badges += `<span class="badge badge-waiting">WAITING</span>`;
+    if (s.breakout)                badges += `<span class="badge badge-breakout">⚠ BREAKOUT</span>`;
 
     div.innerHTML = `
-      <div class="drag-handle" title="Drag to reorder">⠿</div>
-      <span class="roster-num">${String(i+1).padStart(2,'0')}</span>
-      <span class="person-name">${esc(s.name)}</span>
+      <div class="roster-left">
+        <span class="roster-num">${String(i+1).padStart(2,'0')}</span>
+        <span class="person-name">${esc(s.name)}</span>
+        <input class="edit-input" type="text" maxlength="32" value="${esc(s.name)}">
+      </div>
       <div class="roster-right">
         <div class="roster-badges">${badges}</div>
-        <div class="queue-actions">
-          ${canEdit ? `<button class="icon-btn" data-action="edit" data-id="${s.id}" title="Rename">✎</button>` : ''}
-          ${canEdit ? `<button class="icon-btn" data-action="up" data-id="${s.id}" title="Move up" ${!prevIsWaiting?'disabled':''}>↑</button>` : ''}
-          ${canEdit ? `<button class="icon-btn" data-action="dn" data-id="${s.id}" title="Move down" ${!nextIsWaiting?'disabled':''}>↓</button>` : ''}
-          ${canEdit ? `<button class="icon-btn del" data-action="del" data-id="${s.id}" title="Remove">✕</button>` : ''}
+        <div class="queue-actions" ${isActive ? 'style="visibility:hidden;pointer-events:none"' : ''}>
+          <button class="icon-btn up-btn"    title="Move up"   ${!canAct||i===0            ? 'disabled' : ''}>↑</button>
+          <button class="icon-btn dn-btn"    title="Move down" ${!canAct||i===spk.length-1 ? 'disabled' : ''}>↓</button>
+          <button class="icon-btn edit-btn"  title="Edit"      ${!canAct                   ? 'disabled' : ''}>✎</button>
+          <button class="icon-btn del del-btn" title="Remove"  ${isActive                  ? 'disabled' : ''}>✕</button>
         </div>
-      </div>
-    `;
+        <div class="edit-actions">
+          <button class="icon-btn" style="color:var(--green);border-color:var(--green)" data-save>✓</button>
+          <button class="icon-btn" style="color:var(--red);border-color:var(--red)"    data-cancel>✕</button>
+        </div>
+      </div>`;
 
-    if (canEdit) {
-      div.addEventListener('dragstart', e => { dragId = s.id; div.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
-      div.addEventListener('dragover', e => { e.preventDefault(); if (s.id !== dragId) div.classList.add('drag-over'); });
-      div.addEventListener('dragleave', () => div.classList.remove('drag-over'));
-      div.addEventListener('drop', async e => {
-        e.preventDefault(); div.classList.remove('drag-over');
-        if (!dragId || dragId === s.id) return;
-        const arr = S.speakers;
-        const fi = arr.findIndex(x => x.id === dragId);
-        const ti = arr.findIndex(x => x.id === s.id);
-        if (fi<0||ti<0||arr[ti].status!=='waiting') return;
-        const [moved] = arr.splice(fi,1); arr.splice(ti,0,moved);
-        await save(); render();
-      });
-      div.addEventListener('dragend', () => { div.classList.remove('dragging'); rosterList.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over')); dragId=null; });
-    }
+    div.querySelector('.up-btn')?.addEventListener('click',   () => moveSpeaker(s.id, -1));
+    div.querySelector('.dn-btn')?.addEventListener('click',   () => moveSpeaker(s.id, +1));
+    div.querySelector('.edit-btn')?.addEventListener('click', () => startEdit(s.id));
+    div.querySelector('.del-btn')?.addEventListener('click',  () => deleteSpeaker(s.id));
+    div.querySelector('[data-save]')?.addEventListener('click',   () => confirmEdit(s.id));
+    div.querySelector('[data-cancel]')?.addEventListener('click', () => render());
+    div.querySelector('.edit-input')?.addEventListener('keydown', e => {
+      if (e.key === 'Enter')  confirmEdit(s.id);
+      if (e.key === 'Escape') render();
+    });
 
     rosterList.appendChild(div);
   });
-
-  // Action delegation
-  rosterList.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const {action, id} = e.currentTarget.dataset;
-      if (action==='edit') startInlineEdit(id);
-      if (action==='up')   doMove(id, -1);
-      if (action==='dn')   doMove(id, 1);
-      if (action==='del')  doDelete(id);
-    });
-  });
 }
 
-function startInlineEdit(id) {
-  const item = rosterList.querySelector(`[data-id="${id}"]`);
-  if (!item) return;
-  const nameEl = item.querySelector('.person-name');
-  const orig = nameEl.textContent;
-  const inp = document.createElement('input');
-  inp.type = 'text'; inp.className = 'person-name-input';
-  inp.value = orig;
-  nameEl.replaceWith(inp);
-  inp.focus(); inp.select();
-  const commit = () => doRename(id, inp.value || orig);
-  inp.addEventListener('blur', commit);
-  inp.addEventListener('keydown', e => {
-    if (e.key==='Enter') { e.preventDefault(); commit(); }
-    if (e.key==='Escape') { inp.value=orig; commit(); }
-  });
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// ─── STEPPERS ────────────────────────────────────────────────────────────────
+$('inc-present').addEventListener('click', () => { state.presentMins = Math.min((state.presentMins||5)+1,30); presentValEl.textContent = state.presentMins; pushState(); });
+$('dec-present').addEventListener('click', () => { state.presentMins = Math.max((state.presentMins||5)-1,1);  presentValEl.textContent = state.presentMins; pushState(); });
+$('inc-qa').addEventListener('click',      () => { state.qaMins      = Math.min((state.qaMins||5)+1,30);      qaValEl.textContent      = state.qaMins;      pushState(); });
+$('dec-qa').addEventListener('click',      () => { state.qaMins      = Math.max((state.qaMins||5)-1,1);       qaValEl.textContent      = state.qaMins;      pushState(); });
 
-// ================================================================
-// TIMER STEPPERS
-// ================================================================
-$('inc-present').onclick = async () => { S.presentMins=Math.min((S.presentMins||5)+1,30); presentValEl.textContent=S.presentMins; if(S.phase==='idle'){const t=S.presentMins*60;setDisplay(t,t,'idle');fillPresent.style.transform='scaleX(1)';} await save(); };
-$('dec-present').onclick = async () => { S.presentMins=Math.max((S.presentMins||5)-1,1); presentValEl.textContent=S.presentMins; if(S.phase==='idle'){const t=S.presentMins*60;setDisplay(t,t,'idle');fillPresent.style.transform='scaleX(1)';} await save(); };
-$('inc-qa').onclick = async () => { S.qaMins=Math.min((S.qaMins||5)+1,30); qaValEl.textContent=S.qaMins; await save(); };
-$('dec-qa').onclick = async () => { S.qaMins=Math.max((S.qaMins||5)-1,1); qaValEl.textContent=S.qaMins; await save(); };
+// ─── BUTTON EVENTS ───────────────────────────────────────────────────────────
+joinBtn.addEventListener('click', joinQueue);
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinQueue(); });
 
-// ================================================================
-// MAIN EVENTS
-// ================================================================
-joinBtn.onclick = doJoin;
-nameInput.addEventListener('keydown', e => { if(e.key==='Enter') doJoin(); });
-startBtn.onclick = doStartPresent;
-qaBtn.onclick = doStartQA;
-doneBtn.onclick = doDone;
-startNextBtn.onclick = doActivateNext;
-resetBtn.onclick = doReset;
+startBtn.addEventListener('click', () => {
+  if (!state.speakers.find(s => s.status==='present'||s.status==='qa')) startNextSpeaker();
+  else startTimer();
+});
 
-// ================================================================
-// TOAST
-// ================================================================
+nextPhaseBtn.addEventListener('click', goToQA);
+doneBtn.addEventListener('click', markDone);
+startNextBtn.addEventListener('click', startNextSpeaker);
+resetBtn.addEventListener('click', () => { if (confirm('Reset entire session?')) resetSession(); });
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
 let toastT;
-function toast(msg) {
-  toastEl.textContent = msg;
-  toastEl.classList.add('show');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => toastEl.classList.remove('show'), 2800);
+function showToast(msg) {
+  toast.textContent = msg; toast.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ================================================================
-// GO
-// ================================================================
-if (window.storage) {
-  init();
-} else {
-  connOverlay.style.display = 'none';
-  toast('Local mode — no sync across tabs');
-  render();
-}
+// ─── BOOT ────────────────────────────────────────────────────────────────────
+initGun();
 </script>
 </body>
 </html>
