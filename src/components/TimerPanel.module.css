@@ -1,0 +1,203 @@
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 28px 28px 24px;
+  margin-bottom: 28px;
+  position: relative;
+}
+
+.sectionLabel {
+  position: absolute;
+  top: -1px;
+  left: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--amber);
+  background: var(--surface);
+  padding: 0 8px;
+  transform: translateY(-50%);
+}
+
+/* Phase strip */
+.phaseStrip {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.phasePill {
+  flex: 1;
+  padding: 7px 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-align: center;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: var(--bg);
+  transition: all 0.3s;
+}
+
+.phaseDot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+  background: currentColor;
+}
+
+.curPresent {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.curPresent .phaseDot {
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+.curQa {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-glow);
+}
+
+.curQa .phaseDot {
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}
+
+.donePhase {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-glow);
+  opacity: 0.6;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Breakout warning */
+.breakoutWarning {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 59, 59, 0.07);
+  border: 1px solid rgba(255, 59, 59, 0.3);
+  padding: 10px 16px;
+  margin-bottom: 18px;
+  animation: warn-pulse 1s ease-in-out infinite;
+}
+
+.warningIcon {
+  color: var(--red);
+  font-size: 16px;
+}
+
+.warningText {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--red);
+}
+
+@keyframes warn-pulse {
+  0%, 100% { border-color: rgba(255, 59, 59, 0.3); }
+  50% { border-color: rgba(255, 59, 59, 0.75); }
+}
+
+/* Speaker name */
+.speakerName {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+
+.speakerIndex {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.25em;
+  font-weight: 400;
+  font-family: 'Share Tech Mono', monospace;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Phase label */
+.phaseLabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  margin-bottom: 5px;
+}
+
+.phaseLabelPresent { color: var(--amber); }
+.phaseLabelQa      { color: var(--blue); }
+
+/* Timer display */
+.timerDisplay {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(52px, 12vw, 84px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  transition: color 0.3s, text-shadow 0.3s;
+  color: var(--amber);
+  text-shadow: 0 0 30px var(--amber-glow);
+}
+
+.timerDisplay.qaPhase {
+  color: var(--blue);
+  text-shadow: 0 0 30px var(--blue-glow);
+}
+
+.timerDisplay.warning {
+  color: #ff8c00;
+  text-shadow: 0 0 40px rgba(255, 140, 0, 0.3);
+  animation: flicker 1.5s ease-in-out infinite;
+}
+
+.timerDisplay.danger {
+  color: var(--red);
+  text-shadow: 0 0 40px var(--red-glow);
+  animation: flicker 0.6s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+/* Progress */
+.progressBar {
+  height: 3px;
+  background: var(--surface2);
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 1s linear, background 0.5s;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+
+.progressFill.qaPhase { background: var(--blue);  box-shadow: 0 0 8px var(--blue); }
+.progressFill.warning { background: #ff8c00;      box-shadow: 0 0 8px #ff8c00; }
+.progressFill.danger  { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

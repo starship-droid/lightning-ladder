@@ -1,0 +1,115 @@
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  position: relative;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
+}
+
+.label {
+  position: absolute;
+  top: -1px;
+  left: 20px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--amber);
+  background: var(--surface);
+  padding: 0 8px;
+  transform: translateY(-50%);
+}
+
+.joinRow {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.input {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  letter-spacing: 0.04em;
+}
+
+.input::placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow), inset 0 0 20px rgba(245, 166, 35, 0.04);
+}
+
+.timerConfig {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.configLabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.timerGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+}
+
+.stepBtn {
+  background: var(--surface2);
+  border: none;
+  color: var(--amber);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.stepBtn:hover {
+  background: var(--amber-glow);
+}
+
+.stepVal {
+  width: 44px;
+  text-align: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 12px;
+  color: #fff;
+  background: var(--bg);
+  height: 28px;
+  line-height: 28px;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.sep {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+}

@@ -1,0 +1,105 @@
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  gap: 8px;
+}
+
+.item:hover .queueActions {
+  opacity: 1;
+}
+
+.waiting { border-left-color: var(--text-dim); }
+.present { border-left-color: var(--amber); background: rgba(245, 166, 35, 0.04); }
+.qa      { border-left-color: var(--blue);  background: rgba(77, 166, 255, 0.04); }
+.done    { border-left-color: var(--green); opacity: 0.6; }
+.done .name { text-decoration: line-through; text-decoration-color: var(--text-dim); }
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.num {
+  font-family: 'Orbitron', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.present .num { color: var(--amber); }
+.qa .num      { color: var(--blue); }
+.done .num    { color: var(--green); }
+
+.name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--amber);
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  padding: 3px 10px;
+  outline: none;
+  font-weight: 500;
+  min-width: 0;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.queueActions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .queueActions { opacity: 1; }
+}

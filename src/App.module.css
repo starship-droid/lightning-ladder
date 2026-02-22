@@ -1,0 +1,76 @@
+.app {
+  position: relative;
+  z-index: 1;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+}
+
+.rosterHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.rosterTitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+}
+
+.rosterList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-dim);
+}
+
+.emptyIcon {
+  font-size: 30px;
+  margin-bottom: 12px;
+  opacity: 0.35;
+}
+
+.emptyState p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  line-height: 1.9;
+}
+
+.startNextArea {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.sessionComplete {
+  text-align: center;
+  padding: 40px 24px;
+  border: 1px solid rgba(57, 211, 83, 0.25);
+  background: rgba(57, 211, 83, 0.03);
+  margin-top: 20px;
+}
+
+.sessionComplete h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 8px;
+  letter-spacing: 0.1em;
+}
+
+.sessionComplete p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+}

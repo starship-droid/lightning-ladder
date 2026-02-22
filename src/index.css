@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #0a0b0d;
+  --surface: #0f1114;
+  --surface2: #161a1e;
+  --amber: #f5a623;
+  --amber-dim: #b87a1a;
+  --amber-glow: rgba(245, 166, 35, 0.15);
+  --blue: #4da6ff;
+  --blue-glow: rgba(77, 166, 255, 0.15);
+  --red: #ff3b3b;
+  --red-glow: rgba(255, 59, 59, 0.15);
+  --green: #39d353;
+  --green-glow: rgba(57, 211, 83, 0.1);
+  --text: #c8cdd4;
+  --text-dim: #5a6270;
+  --border: rgba(245, 166, 35, 0.15);
+  --border-bright: rgba(245, 166, 35, 0.4);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Grid background */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(245, 166, 35, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 166, 35, 0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 11px 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.btn:hover::after { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn:disabled::after { display: none; }
+
+.btn-amber { background: var(--amber); color: #000; }
+.btn-amber:hover { box-shadow: 0 0 20px var(--amber-glow); }
+
+.btn-blue { background: var(--blue); color: #000; }
+.btn-blue:hover { box-shadow: 0 0 20px var(--blue-glow); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--border-bright);
+}
+.btn-ghost:hover { border-color: var(--amber); box-shadow: 0 0 12px var(--amber-glow); }
+
+.btn-green { background: var(--green); color: #000; }
+.btn-green:hover { box-shadow: 0 0 20px var(--green-glow); }
+
+/* ── ICON BUTTONS ── */
+.icon-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { border-color: var(--amber); color: var(--amber); }
+.icon-btn.del:hover { border-color: var(--red); color: var(--red); }
+.icon-btn:disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+
+/* ── BADGES ── */
+.badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  padding: 3px 7px;
+}
+
+.badge-presenting {
+  background: var(--amber-glow);
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.badge-qa {
+  background: var(--blue-glow);
+  color: var(--blue);
+  border: 1px solid rgba(77, 166, 255, 0.4);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.badge-done {
+  background: var(--green-glow);
+  color: var(--green);
+  border: 1px solid rgba(57, 211, 83, 0.3);
+}
+
+.badge-breakout {
+  background: var(--red-glow);
+  color: var(--red);
+  border: 1px solid rgba(255, 59, 59, 0.4);
+  animation: warn-pulse 2s infinite;
+}
+
+.badge-waiting {
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes warn-pulse {
+  0%, 100% { border-color: rgba(255, 59, 59, 0.3); }
+  50% { border-color: rgba(255, 59, 59, 0.75); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+@keyframes bolt-flicker {
+  0%, 90%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6)); }
+  92% { opacity: 0.5; filter: drop-shadow(0 0 2px rgba(245, 166, 35, 0.2)); }
+  94% { opacity: 1; filter: drop-shadow(0 0 12px rgba(245, 166, 35, 0.9)); }
+  96% { opacity: 0.7; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--surface2);
+  border: 1px solid var(--border-bright);
+  padding: 11px 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  z-index: 10000;
+  transform: translateY(70px);
+  opacity: 0;
+  transition: all 0.28s;
+  max-width: 300px;
+  pointer-events: none;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* ── CONNECTING OVERLAY ── */
+.conn-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.conn-overlay .spin {
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--border);
+  border-top-color: var(--amber);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.conn-overlay .conn-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+}
+
+.conn-overlay p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .join-row { flex-direction: column; }
+  .timer-controls { flex-direction: column; }
+  .queue-actions { opacity: 1 !important; }
+}

@@ -1,0 +1,109 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 36px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.bolt {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6));
+  animation: bolt-flicker 4s ease-in-out infinite;
+}
+
+@keyframes bolt-flicker {
+  0%, 90%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6)); }
+  92% { opacity: 0.5; filter: drop-shadow(0 0 2px rgba(245, 166, 35, 0.2)); }
+  94% { opacity: 1; filter: drop-shadow(0 0 12px rgba(245, 166, 35, 0.9)); }
+  96% { opacity: 0.7; }
+}
+
+.title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(20px, 5vw, 32px);
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.title em {
+  color: var(--amber);
+  font-style: normal;
+}
+
+.statusDot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.dotLive {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.dotConnecting {
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+
+.dotOffline {
+  background: var(--red);
+  box-shadow: 0 0 8px var(--red);
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.right {
+  text-align: right;
+}
+
+.count {
+  font-family: 'Orbitron', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--amber);
+}
+
+.countLabel {
+  font-size: 11px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-top: 2px;
+}
