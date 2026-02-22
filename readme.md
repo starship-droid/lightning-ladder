@@ -33,9 +33,9 @@ A real-time agenda timer for standups, retros, planning sessions — anything wh
 
 ## Tech Stack
 
-- **React** + **Vite** — component-based UI with fast dev builds
+- **React** + **Vite** — component-based UI with fast builds
 - **Ably Pub/Sub** — real-time sync across all devices (free tier)
-- **GitHub Actions** — automatic deploy to GitHub Pages on push to `main`
+- **Netlify** — automatic deploy from `main` branch
 - **CSS Modules** — scoped styles per component
 - Fonts: Orbitron, IBM Plex Mono, Share Tech Mono (Google Fonts)
 
@@ -65,54 +65,29 @@ npm run dev
 
 ---
 
-## Deployment (GitHub Pages)
+## Deployment (Netlify)
 
-### 1. Add your Ably key as a GitHub secret
+### 1. Connect your repo to Netlify
 
-Go to your repo → **Settings → Secrets and variables → Actions → New repository secret**
+1. Go to [netlify.com](https://netlify.com) and log in
+2. **Add new site** → **Import an existing project** → connect GitHub
+3. Select your `lightning-ladder` repo
+4. Netlify will auto-detect the build settings from `netlify.toml` — no changes needed
+5. Hit **Deploy**
 
-| Name | Value |
+### 2. Add your Ably key as an environment variable
+
+In Netlify dashboard → **Site settings** → **Environment variables** → **Add a variable**:
+
+| Key | Value |
 |---|---|
 | `VITE_ABLY_API_KEY` | your Ably API key |
 
-### 2. Ensure the GitHub Actions workflow exists
+Then **trigger a redeploy** (Deploys → Trigger deploy → Deploy site) so the build picks up the new variable.
 
-The file `.github/workflows/deploy.yml` handles the build and deploy automatically on every push to `main`:
+### 3. Subsequent deploys
 
-```yaml
-name: Deploy to GitHub Pages
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install
-      - run: npm run build
-        env:
-          VITE_ABLY_API_KEY: ${{ secrets.VITE_ABLY_API_KEY }}
-      - uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-```
-
-### 3. Push to main
-
-```bash
-git add .
-git commit -m "your message"
-git push origin main
-```
-
-GitHub Actions will build and deploy automatically. Check the **Actions** tab in your repo to see progress.
+Every push to `main` will automatically trigger a new deploy on Netlify. No manual steps needed.
 
 ---
 
@@ -121,7 +96,7 @@ GitHub Actions will build and deploy automatically. Check the **Actions** tab in
 1. Sign up at [ably.com](https://ably.com) (free tier is plenty)
 2. Create a new app — choose **Pub/Sub**
 3. Copy the API key from the dashboard
-4. Add it to your `.env` locally and as a GitHub secret for deployments
+4. Add it to your `.env` locally and as a Netlify environment variable for deployments
 
 ---
 
@@ -143,6 +118,5 @@ src/
     TimerPanel.jsx      # Active speaker timer + phase controls
     RosterItem.jsx      # Individual speaker row (edit/move/delete)
     Footer.jsx          # Version number + sync status
+netlify.toml            # Netlify build config + redirect rules
 ```
-
-Written using Claude Sonnet 4.6 | Prompted by SophieA
