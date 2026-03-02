@@ -2,13 +2,23 @@
 
 **Live demo:** https://lightning-ladder.netlify.app/
 
-A real-time agenda timer for standups, retros, planning sessions — anything where you need structured turns and a shared queue. Everyone joins from the same link, names appear instantly across all devices, and a two-phase timer keeps each speaker on track.
+A real-time, multi-room agenda timer for standups, retros, planning sessions — anything where you need structured turns and a shared queue. Create a room, share the code or link, and everyone joins instantly. Names and timers sync live across all devices via Ably.
 
 ---
 
 ## Features
 
-- **Real-time sync** — anyone can type their name and join; the queue updates live across all connected devices via Ably
+### Multi-Room System
+- **Lobby / Home screen** — create a new room or join an existing one by 6-character code
+- **Public & Private rooms** — toggle visibility when creating; public rooms appear in the lobby with live member counts
+- **Room names** — optionally name your room (displayed in the lobby and in the room bar)
+- **Shareable links** — copy a room code or direct URL to invite others
+- **Presence tracking** — live member count per room via Ably presence
+- **Auto-cleanup** — empty rooms (no names added, no notes typed) are removed immediately; rooms with content are cleaned up 30 seconds after the last person leaves
+- **Room isolation** — each room has its own Ably channels for state, notes, and presence — no cross-room data leaks
+
+### Speaker Queue & Timer
+- **Real-time sync** — anyone can type their name and join; the queue updates live across all connected devices
 - **Two-phase timer per speaker**
   - **Present Time** — the speaker shares their update (amber countdown)
   - **Q&A Time** — open floor for questions and comments (blue countdown)
@@ -16,33 +26,42 @@ A real-time agenda timer for standups, retros, planning sessions — anything wh
 - **Auto-advance** — when a speaker finishes Q&A, the next speaker is loaded automatically
 - **Drag-and-drop reorder** — grab the ⠿ handle to drag speakers into a new order
 - **Editable timer values** — type a number directly or use +/− steppers (1–30 min)
-- **Shared notes** — two modes: a **built-in** rich text editor synced in real-time (BBB-style toolbar: bold, italic, underline, strikethrough, lists, indent, undo/redo, clear formatting, export as TXT/HTML), or a **BBB Etherpad** iframe mode that embeds your BigBlueButton shared notes directly. Desktop shows a sidebar; mobile shows a collapsible panel
-- **Unread notes notification** — when someone edits shared notes while your panel is collapsed, a pulsing red dot appears on the toggle/tab prompting you to open it. Clears per-user when you expand the panel
-- **Breakout room alert** — if either timer runs out, a ⚠ Breakout Room warning is added to that speaker's name
-- **Configurable timers** — set Present and Q&A duration independently (1–30 min each, default 5 min)
+- **Breakout room alert** — if either timer runs out, a ⚠ Breakout Room warning is shown
 - **Queue management** — hover any waiting speaker to reorder (↑↓), edit their name (✎), or remove them (✕)
 - **Session reset** — wipe the queue and start fresh at any time
-- **Sync status** — footer shows live connection state and app version at a glance
+
+### Shared Notes
+- **Built-in rich text editor** — synced in real-time with toolbar (bold, italic, underline, strikethrough, lists, indent, undo/redo, clear formatting, export as TXT/HTML)
+- **BBB Etherpad mode** — embed BigBlueButton shared notes directly via iframe
+- **Desktop sidebar + mobile collapsible panel**
+- **Unread notification** — pulsing dot when someone edits notes while your panel is collapsed
+
+### Polish
+- **Dark / Light theme** — toggle with system preference detection
+- **Sync status** — footer shows live connection state and app version
+- **Consistent SVG stroke icons** throughout (no emoji mix)
 
 ---
 
 ## How It Works
 
-1. Share the link with your team
-2. Everyone types their name and hits **Join** — the queue builds in real time
-3. Hit **▶ Start Session** to kick off the first speaker
-4. **Present Time** starts — hit **→ End Present / Start Q&A** when they're done (or let the timer expire)
-5. **Q&A Time** starts — hit **✓ Done** when discussion wraps up
-6. Repeat for each speaker
+1. Open the app — you land on the **Lobby**
+2. **Create a room** (set a name, choose public or private) or **join by code**
+3. Share the 6-character room code or direct link with your team
+4. Everyone types their name and hits **Join** — the queue builds in real time
+5. Hit **▶ Start Session** to kick off the first speaker
+6. **Present Time** → **Q&A Time** → **✓ Done** — repeat for each speaker
+7. When done, head back to the lobby or close the tab
 
 ---
 
 ## Tech Stack
 
 - **React** + **Vite** — component-based UI with fast builds
-- **Ably Pub/Sub** — real-time sync across all devices (free tier)
+- **Ably Pub/Sub** — real-time sync, presence tracking, and room isolation (free tier)
 - **Netlify** — automatic deploy from `main` branch
 - **CSS Modules** — scoped styles per component
+- **Hash-based routing** — `#/room/XXXXXX` for room URLs (no server config needed)
 - Fonts: Orbitron, IBM Plex Mono, Share Tech Mono (Google Fonts)
 
 ---
@@ -110,21 +129,29 @@ Every push to `main` will automatically trigger a new deploy on Netlify. No manu
 
 ```
 src/
-  main.jsx              # Entry point
-  App.jsx               # Root component, state management
+  main.jsx                # Entry point
+  App.jsx                 # Router — lobby vs room view
   App.module.css
-  index.css             # Global design system / CSS variables
+  index.css               # Global design system / CSS variables
   hooks/
-    useAbly.js          # Ably connection + pub/sub
-    useAblyNotes.js     # Ably channel for shared notes + BBB URL sync
-    useTimer.js         # Countdown timer logic
-    useToast.js         # Toast notification
+    useAbly.js            # Room-scoped Ably connection + pub/sub
+    useAblyNotes.js       # Room-scoped Ably channel for shared notes
+    useLobby.js           # Lobby channel — public room list
+    useRoom.js            # Hash routing, room ID generation, navigation
+    useRoomPresence.js    # Ably presence tracking per room
+    useTimer.js           # Countdown timer logic
+    useTheme.js           # Dark/light theme toggle
+    useToast.js           # Toast notification
   components/
-    Header.jsx          # Logo, connection status, queue count
-    JoinSection.jsx     # Name input + timer config
-    TimerPanel.jsx      # Active speaker timer + phase controls
-    RosterItem.jsx      # Individual speaker row (edit/move/delete)
-    SharedNotes.jsx     # Shared notes (built-in editor + BBB iframe)
-    Footer.jsx          # Version number + sync status
-netlify.toml            # Netlify build config + redirect rules
+    HomeScreen.jsx        # Lobby — create room, join by code, public room list
+    Room.jsx              # Full room view (queue, timer, notes)
+    RoomBar.jsx           # Room header bar (code, name, share buttons, presence)
+    Header.jsx            # Logo, connection status, queue count
+    JoinSection.jsx       # Name input + timer config
+    TimerPanel.jsx        # Active speaker timer + phase controls
+    RosterItem.jsx        # Individual speaker row (edit/move/delete)
+    SharedNotes.jsx       # Shared notes (built-in editor + BBB iframe)
+    ThemeToggle.jsx       # Dark/light mode button
+    Footer.jsx            # Version number + sync status
+netlify.toml              # Netlify build config + redirect rules
 ```

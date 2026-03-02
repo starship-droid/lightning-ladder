@@ -1,19 +1,13 @@
 import { useEffect, useRef, useCallback } from 'react'
 import Ably from 'ably'
 
-// Derive a channel name from the deployment URL so each team is isolated
-const CHANNEL_NAME = 'lightning-ladder__' +
-  (window.location.hostname + window.location.pathname)
-    .replace(/[^a-zA-Z0-9]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
-
-export function useAbly({ onStateUpdate, onConnected, onDisconnected }) {
+export function useAbly({ roomId, onStateUpdate, onConnected, onDisconnected }) {
   const clientRef  = useRef(null)
   const channelRef = useRef(null)
   const isMounted  = useRef(true)
 
   useEffect(() => {
+    if (!roomId) return
     isMounted.current = true
 
     const apiKey = import.meta.env.VITE_ABLY_API_KEY
@@ -45,10 +39,9 @@ export function useAbly({ onStateUpdate, onConnected, onDisconnected }) {
       if (isMounted.current) onDisconnected?.()
     })
 
-    // rewind: '1' replays the last published message to new subscribers
-    // on channel attach, delivered through the normal subscribe callback.
-    // This guarantees new clients get the latest state before they can interact.
-    const channel = client.channels.get(CHANNEL_NAME, { params: { rewind: '1' } })
+    // Room-scoped channel name — each room gets its own isolated channel
+    const channelName = `lightning-ladder__room_${roomId}__state`
+    const channel = client.channels.get(channelName, { params: { rewind: '1' } })
     channelRef.current = channel
 
     // Subscribe to state updates (including the rewound initial state)
@@ -63,7 +56,7 @@ export function useAbly({ onStateUpdate, onConnected, onDisconnected }) {
       channel.unsubscribe()
       client.close()
     }
-  }, []) // eslint-disable-line
+  }, [roomId]) // eslint-disable-line
 
   const publish = useCallback((state) => {
     channelRef.current?.publish('state', state)

@@ -1,0 +1,445 @@
+/* ── Container ── */
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+.inner {
+  width: 100%;
+  max-width: 820px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.35em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.bolt {
+  font-size: 28px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6));
+  animation: bolt-flicker 4s ease-in-out infinite;
+}
+
+@keyframes bolt-flicker {
+  0%, 90%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(245, 166, 35, 0.6)); }
+  92% { opacity: 0.5; filter: drop-shadow(0 0 2px rgba(245, 166, 35, 0.2)); }
+  94% { opacity: 1; filter: drop-shadow(0 0 12px rgba(245, 166, 35, 0.9)); }
+  96% { opacity: 0.7; }
+}
+
+.title {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(20px, 5vw, 32px);
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+
+.title em {
+  color: var(--amber);
+  font-style: normal;
+}
+
+.tagline {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--text-dim);
+}
+
+/* ── Action cards ── */
+.actions {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 16px;
+  margin-bottom: 36px;
+  align-items: start;
+}
+
+@media (max-width: 600px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px 20px 20px;
+  position: relative;
+}
+
+.cardCreate {
+  /* Emphasise the create card */
+}
+
+.cardJoin {
+  /* Compact join card */
+}
+
+.cardLabel {
+  position: absolute;
+  top: -1px;
+  left: 16px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: var(--amber);
+  background: var(--surface);
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  transform: translateY(-50%);
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cardDesc {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.cardButtons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Create form ── */
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggleLabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+/* ── Pill toggle (Private / Public) ── */
+.visPills {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+}
+
+.visPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  transition: all 0.18s;
+}
+
+.visPill:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.visPill:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.visPillActive {
+  background: var(--surface2);
+  color: var(--amber);
+}
+
+.visPillActive svg {
+  stroke: var(--amber);
+}
+
+.visPillActivePublic {
+  background: rgba(57, 211, 83, 0.08);
+  color: var(--green);
+}
+
+.visPillActivePublic svg {
+  stroke: var(--green);
+}
+
+.nameRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input::placeholder {
+  color: var(--text-dim);
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow);
+}
+
+/* ── Join by code ── */
+.joinRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.codeInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  padding: 10px 14px;
+  outline: none;
+  text-align: center;
+  text-transform: uppercase;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 0;
+}
+
+.codeInput::placeholder {
+  font-size: 14px;
+  letter-spacing: 0.15em;
+  opacity: 0.3;
+  font-weight: 400;
+}
+
+.codeInput:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue-glow);
+}
+
+.codeInputError {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--red-glow);
+}
+
+.error {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--red);
+}
+
+/* ── Lobby ── */
+.lobby {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.lobbyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lobbyTitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--text-dim);
+}
+
+.lobbyCount {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+}
+
+.emptyLobby {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-dim);
+}
+
+.emptyIcon {
+  font-size: 26px;
+  margin-bottom: 10px;
+  opacity: 0.3;
+}
+
+.emptyLobby p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  line-height: 1.9;
+}
+
+/* ── Room list ── */
+.roomList {
+  display: flex;
+  flex-direction: column;
+}
+
+.roomCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  width: 100%;
+}
+
+.roomCard:last-child {
+  border-bottom: none;
+}
+
+.roomCard:hover {
+  background: var(--amber-glow);
+}
+
+.roomInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.roomName {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.roomCode {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.roomMeta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.memberCount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.memberCount svg {
+  stroke: var(--text-dim);
+  flex-shrink: 0;
+}
+
+.joinArrow {
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.joinArrow svg {
+  stroke: var(--amber);
+}
+
+.roomCard:hover .joinArrow {
+  opacity: 1;
+}
+
+/* ── Version footer ── */
+.versionFooter {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.versionFooter strong {
+  color: var(--amber);
+  font-weight: 400;
+}

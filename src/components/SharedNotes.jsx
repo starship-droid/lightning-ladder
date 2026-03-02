@@ -39,7 +39,7 @@ function stripSessionToken(url) {
   return url.replace(/[&?]sessionToken=[^&]*/gi, '')
 }
 
-export function SharedNotes({ sidebarMode, onRemoteActivity }) {
+export function SharedNotes({ sidebarMode, onRemoteActivity, roomId, onContentChange }) {
   const [open, setOpen]             = useState(false)
   const [mobileUnread, setMobileUnread] = useState(false)
   const editorRef                   = useRef(null)
@@ -90,6 +90,7 @@ export function SharedNotes({ sidebarMode, onRemoteActivity }) {
   }, [])
 
   const { publish, publishBbbUrl } = useAblyNotes({
+    roomId,
     onNotesUpdate: handleRemoteNotes,
     onBbbUrlUpdate: handleRemoteBbbUrl,
   })
@@ -97,8 +98,10 @@ export function SharedNotes({ sidebarMode, onRemoteActivity }) {
   const handleInput = useCallback(() => {
     if (!editorRef.current) return
     markLocalEdit()
-    publish(editorRef.current.innerHTML)
-  }, [publish, markLocalEdit])
+    const html = editorRef.current.innerHTML
+    publish(html)
+    onContentChange?.(html.length > 0 && html !== '<br>')
+  }, [publish, markLocalEdit, onContentChange])
 
   const execCmd = useCallback((cmd) => {
     editorRef.current?.focus()

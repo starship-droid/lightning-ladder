@@ -1,19 +1,14 @@
 import { useEffect, useRef, useCallback } from 'react'
 import Ably from 'ably'
 
-const CHANNEL_NAME = 'lightning-ladder-notes__' +
-  (window.location.hostname + window.location.pathname)
-    .replace(/[^a-zA-Z0-9]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '')
-
-export function useAblyNotes({ onNotesUpdate, onBbbUrlUpdate }) {
+export function useAblyNotes({ roomId, onNotesUpdate, onBbbUrlUpdate }) {
   const clientRef  = useRef(null)
   const channelRef = useRef(null)
   const isMounted  = useRef(true)
   const timerRef   = useRef(null)
 
   useEffect(() => {
+    if (!roomId) return
     isMounted.current = true
 
     const apiKey = import.meta.env.VITE_ABLY_API_KEY
@@ -30,7 +25,9 @@ export function useAblyNotes({ onNotesUpdate, onBbbUrlUpdate }) {
     }
     clientRef.current = client
 
-    const channel = client.channels.get(CHANNEL_NAME, { params: { rewind: '1' } })
+    // Room-scoped channel name for notes
+    const channelName = `lightning-ladder__room_${roomId}__notes`
+    const channel = client.channels.get(channelName, { params: { rewind: '1' } })
     channelRef.current = channel
 
     channel.subscribe('notes', (message) => {
@@ -51,7 +48,7 @@ export function useAblyNotes({ onNotesUpdate, onBbbUrlUpdate }) {
       channel.unsubscribe()
       client.close()
     }
-  }, []) // eslint-disable-line
+  }, [roomId]) // eslint-disable-line
 
   // Debounced publish — waits 300ms after last keystroke to avoid flooding
   const publish = useCallback((text) => {
