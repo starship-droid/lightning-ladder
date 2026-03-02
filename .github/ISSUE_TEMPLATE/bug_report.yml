@@ -1,0 +1,176 @@
+name: "🐛 Bug Report"
+description: "Something isn't working correctly in Lightning Ladder"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Lightning Ladder Bug Report
+        Thanks for taking the time to report a bug! Please fill out **every** section below — the more detail you give, the faster this gets fixed.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Which part of the app is affected?"
+      description: "Select the area where you encountered the bug."
+      options:
+        - "Lobby / Home Screen"
+        - "Room Creation (name, public/private toggle)"
+        - "Join by Code / Join by Link"
+        - "Speaker Queue (adding, removing, reordering names)"
+        - "Timer (Present Time countdown)"
+        - "Timer (Q&A Time countdown)"
+        - "Timer (pause/resume)"
+        - "Timer (auto-advance to next speaker)"
+        - "Drag-and-Drop Reorder"
+        - "Shared Notes (rich text editor)"
+        - "Shared Notes (BBB Etherpad embed)"
+        - "Room Bar (copy link/code, room name display)"
+        - "Public Room Listing in Lobby"
+        - "Presence / Member Count"
+        - "Dark/Light Theme Toggle"
+        - "Breakout Room Alert"
+        - "Session Reset"
+        - "Footer / Sync Status"
+        - "Other (describe below)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: "What happened?"
+      description: "Describe the bug clearly. What did you see? What went wrong?"
+      placeholder: |
+        Example: "I joined a room using the 6-character code, but my name didn't appear 
+        in the speaker queue on the other person's screen. The timer panel still showed 
+        'No speakers yet'."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What did you expect to happen?"
+      description: "Tell us what the correct behavior should have been."
+      placeholder: |
+        Example: "After typing my name and clicking Join, my name should appear in the 
+        speaker queue on all connected devices within a second or two."
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce"
+      description: "If you can remember how to trigger this, walk us through the steps. Helps a lot but no worries if you can't."
+      placeholder: |
+        1. Open https://lightning-ladder.netlify.app/
+        2. Create a public room named "Standup"
+        3. Open a second browser tab and join using the 6-character code
+        4. In the second tab, type a name and click "Join"
+        5. Check the first tab — the name does not appear
+    validations:
+      required: false
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: "How often does this happen?"
+      options:
+        - "Every time (100%)"
+        - "Most of the time (~75%)"
+        - "About half the time (~50%)"
+        - "Rarely (~25%)"
+        - "Only happened once"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: multi-device
+    attributes:
+      label: "Were multiple devices/tabs involved?"
+      description: "Lightning Ladder is real-time — were you testing across tabs or devices?"
+      options:
+        - "Single tab only"
+        - "Multiple tabs, same browser"
+        - "Multiple browsers on the same device"
+        - "Multiple devices (e.g. phone + laptop)"
+        - "Not applicable"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: room-type
+    attributes:
+      label: "Room type"
+      description: "Was this a public or private room?"
+      options:
+        - "Public room"
+        - "Private room"
+        - "N/A — bug is on the lobby/home screen"
+        - "Not sure"
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: "Browser & version"
+      description: "e.g. Chrome 120, Safari 17.2, Firefox 121, Edge 120"
+      placeholder: "Chrome 120"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: "Device type"
+      options:
+        - "Desktop / Laptop"
+        - "Tablet"
+        - "Mobile phone"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: theme
+    attributes:
+      label: "Which theme were you using?"
+      options:
+        - "Dark theme"
+        - "Light theme"
+        - "Not sure / doesn't matter"
+    validations:
+      required: false
+
+  - type: textarea
+    id: console-errors
+    attributes:
+      label: "Console errors (if any)"
+      description: "Open DevTools (F12 → Console tab) and paste any red error messages here."
+      render: shell
+      placeholder: |
+        Paste any errors from the browser console here.
+        If there are none, just write "No console errors".
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots or screen recordings"
+      description: "Drag & drop images/videos here. A screenshot of the broken state is incredibly helpful."
+      placeholder: "Drag and drop screenshots or recordings here, or paste image URLs."
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Anything else?"
+      description: "Network issues? VPN? Slow connection? Anything that might be relevant."
+      placeholder: "Any additional context..."
+    validations:
+      required: false

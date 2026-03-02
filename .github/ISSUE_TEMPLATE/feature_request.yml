@@ -1,0 +1,116 @@
+name: "✨ Feature Request"
+description: "Suggest a new feature or improvement for Lightning Ladder"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Lightning Ladder Feature Request
+        Got an idea to make Lightning Ladder better? Fill this out so it's actually actionable!
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Which area does this feature relate to?"
+      description: "Select the closest match."
+      options:
+        - "Lobby / Home Screen"
+        - "Room Creation & Settings"
+        - "Speaker Queue"
+        - "Timer (Present / Q&A phases)"
+        - "Shared Notes"
+        - "Room Bar / Sharing"
+        - "Public Room Listing"
+        - "Presence & Member Tracking"
+        - "Themes / Visual Design"
+        - "Mobile Experience"
+        - "Accessibility"
+        - "Keyboard Shortcuts"
+        - "Notifications / Alerts"
+        - "Export / Import"
+        - "New Feature Area (doesn't exist yet)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "What problem does this solve?"
+      description: "Describe the pain point or limitation you're running into. Why do you want this?"
+      placeholder: |
+        Example: "When we have a large standup with 12+ people, there's no way to see 
+        how much total time the session will take. I have to mentally add up all the 
+        present + Q&A times, which is annoying."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "Describe your proposed solution"
+      description: "How should this feature work? Even a rough idea helps — doesn't need to be detailed."
+      placeholder: |
+        Example: "Add a 'Total Session Time' display below the timer panel that shows:
+        - Estimated total = (present mins + Q&A mins) × number of speakers
+        - Elapsed time so far
+        - Remaining time estimate
+        It should update live as speakers are added/removed or timer values change."
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives you've considered"
+      description: "Have you thought of other ways to solve this? What are the tradeoffs?"
+      placeholder: |
+        Example: "I considered just using a separate timer app alongside Lightning Ladder, 
+        but that defeats the purpose of having everything in one place."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "How big is this change?"
+      description: "Your best guess at the scope."
+      options:
+        - "Small — minor tweak or addition"
+        - "Medium — new UI element or behavior change"
+        - "Large — significant new feature or system change"
+        - "Not sure"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: "Who benefits from this?"
+      options:
+        - "Everyone using the app"
+        - "People running large standups (8+ people)"
+        - "People running small standups (2–4 people)"
+        - "Room creators / facilitators only"
+        - "Mobile users specifically"
+        - "Accessibility needs"
+        - "Niche use case (describe above)"
+    validations:
+      required: false
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: "Mockups or examples"
+      description: "Sketches, screenshots from other apps, or anything visual that helps explain the idea."
+      placeholder: "Drag and drop images here, or link to examples from other tools."
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Anything else?"
+      description: "Edge cases, related features, or other context."
+    validations:
+      required: false

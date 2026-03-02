@@ -1,0 +1,144 @@
+name: "🔄 Real-Time Sync Issue"
+description: "Something isn't syncing correctly between devices or tabs"
+title: "[Sync]: "
+labels: ["bug", "sync"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Lightning Ladder Sync Issue
+        Real-time sync is the core of Lightning Ladder. If things aren't syncing right across tabs or devices, this template will help us track it down.
+
+  - type: dropdown
+    id: sync-area
+    attributes:
+      label: "What isn't syncing?"
+      description: "Select everything that applies."
+      multiple: true
+      options:
+        - "Speaker queue (names not appearing on other devices)"
+        - "Speaker order (drag-and-drop reorder not reflected)"
+        - "Timer state (start/pause/stop not syncing)"
+        - "Timer values (present/Q&A minutes not matching)"
+        - "Current speaker / phase not matching across devices"
+        - "Shared Notes content"
+        - "Shared Notes unread indicator"
+        - "Member count / presence"
+        - "Public room listing in lobby"
+        - "Room cleanup (room not disappearing after everyone leaves)"
+        - "Breakout room alert not showing on all devices"
+        - "Other (describe below)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the sync problem"
+      description: "What did you see on each device/tab? Be specific about what was different."
+      placeholder: |
+        Example: 
+        - Tab A: Shows 3 speakers in the queue, timer running at 2:45
+        - Tab B: Shows only 2 speakers, timer stuck at 5:00 (never started)
+        - Both tabs are in the same room (code: ABC123)
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to reproduce"
+      description: "If you can recall the sequence of actions, that helps a lot — but no worries if not."
+      placeholder: |
+        1. Open Tab A → Create a public room
+        2. Open Tab B → Join using room code
+        3. Tab A: Add name "Alice", click Join
+        4. Tab B: Add name "Bob", click Join  
+        5. Tab A: Click Start Session
+        6. Tab B: Timer does not start — still shows "waiting"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: setup
+    attributes:
+      label: "How were you testing?"
+      options:
+        - "Two tabs in the same browser"
+        - "Two different browsers on the same computer"
+        - "Two different devices on the same network"
+        - "Two different devices on different networks"
+        - "Three or more clients"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: connection-state
+    attributes:
+      label: "What did the footer sync status show?"
+      description: "Check the bottom of the page — it shows the Ably connection state."
+      options:
+        - "Connected (green) on all devices"
+        - "Connecting/reconnecting on one device"
+        - "Disconnected on one device"
+        - "Didn't check / don't remember"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: delay
+    attributes:
+      label: "Was there a delay, or did it never sync?"
+      options:
+        - "Never synced at all"
+        - "Synced after a long delay (10+ seconds)"
+        - "Synced after a short delay (2–10 seconds)"
+        - "Intermittent — sometimes syncs, sometimes doesn't"
+        - "Was syncing fine, then stopped"
+    validations:
+      required: false
+
+  - type: input
+    id: room-code
+    attributes:
+      label: "Room code (if you remember)"
+      description: "The 6-character room code, if you still have it."
+      placeholder: "e.g. X7K2MQ"
+    validations:
+      required: false
+
+  - type: input
+    id: browsers
+    attributes:
+      label: "Browser(s) & version(s)"
+      description: "List all browsers involved."
+      placeholder: "e.g. Tab A: Chrome 120, Tab B: Safari 17.2"
+    validations:
+      required: false
+
+  - type: textarea
+    id: console-errors
+    attributes:
+      label: "Console errors from any tab"
+      description: "Open DevTools (F12 → Console) on each tab and paste any errors."
+      render: shell
+      placeholder: "Paste console errors here. Check ALL tabs/devices if possible."
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots showing the mismatch"
+      description: "Side-by-side screenshots of each tab/device showing different states are extremely helpful."
+      placeholder: "Drag and drop images here."
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Anything else?"
+      description: "Network conditions, VPN, corporate firewall, etc."
+    validations:
+      required: false

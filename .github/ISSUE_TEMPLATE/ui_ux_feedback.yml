@@ -1,0 +1,133 @@
+name: "🎨 UI/UX Feedback"
+description: "Something looks off, feels clunky, or could be improved visually"
+title: "[UI/UX]: "
+labels: ["ui/ux"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚡ Lightning Ladder UI/UX Feedback
+        Noticed something that looks weird, is hard to use, or could be prettier? This is the place.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: "Which part of the app?"
+      options:
+        - "Lobby / Home Screen"
+        - "Room Creation Modal/Form"
+        - "Join by Code Input"
+        - "Public Room Cards in Lobby"
+        - "Room Bar (top bar inside a room)"
+        - "Speaker Queue / Roster List"
+        - "Timer Panel"
+        - "Shared Notes Panel"
+        - "Shared Notes Toolbar"
+        - "Header"
+        - "Footer / Sync Status"
+        - "Theme Toggle"
+        - "Drag-and-Drop Interactions"
+        - "Toast Notifications"
+        - "Breakout Room Alert"
+        - "Overall Layout / Spacing"
+        - "Typography / Fonts"
+        - "Icons"
+        - "Mobile Layout"
+        - "Other"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: "What kind of feedback is this?"
+      options:
+        - "Visual bug — something looks broken or misaligned"
+        - "Usability — something is confusing or hard to use"
+        - "Responsiveness — doesn't look right on my screen size"
+        - "Accessibility — hard to read, missing labels, poor contrast"
+        - "Animation/transition — jerky, missing, or too slow"
+        - "Suggestion — I think this could look/work better"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the issue or suggestion"
+      description: "What looks off or what would you change? Be specific about what you see."
+      placeholder: |
+        Example: "On mobile (iPhone 15), the speaker queue items overlap the timer panel 
+        when there are more than 5 speakers. The roster items don't scroll — they just 
+        stack on top of the timer controls."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What should it look like or how should it behave?"
+      description: "Describe the ideal state or link to an example of what you'd expect."
+      placeholder: |
+        Example: "The speaker list should be scrollable with a max height, so it never 
+        overlaps the timer panel. Maybe add a subtle scroll indicator."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: theme
+    attributes:
+      label: "Which theme?"
+      options:
+        - "Dark theme"
+        - "Light theme"
+        - "Both themes"
+        - "Doesn't matter"
+    validations:
+      required: false
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: "Device type"
+      options:
+        - "Desktop / Laptop"
+        - "Tablet"
+        - "Mobile phone"
+        - "Multiple / All"
+    validations:
+      required: false
+
+  - type: input
+    id: screen-size
+    attributes:
+      label: "Screen size or resolution (if relevant)"
+      description: "Viewport size or device model."
+      placeholder: "e.g. 1920×1080, iPhone 15, iPad Air"
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: "Browser & version"
+      placeholder: "e.g. Chrome 120, Safari 17.2"
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: "A picture is worth a thousand words — super helpful if you can include one!"
+      placeholder: "Drag and drop screenshots here — show us what you see!"
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: "Anything else?"
+      description: "Zoom level, OS accessibility settings, etc."
+    validations:
+      required: false
