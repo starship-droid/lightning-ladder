@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useLobby } from '../hooks/useLobby'
+import { useRoomLookup } from '../hooks/useRoomLookup'
 import { ThemeToggle } from './ThemeToggle'
 import styles from './HomeScreen.module.css'
 
@@ -29,31 +30,49 @@ const IconGlobe = () => (
 )
 
 export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
-  const [joinCode, setJoinCode] = useState('')
-  const [joinError, setJoinError] = useState('')
+  const [input, setInput] = useState('')
   const [isPublic, setIsPublic] = useState(false)
-  const [roomName, setRoomName] = useState('')
+  const [error, setError] = useState('')
   const { publicRooms } = useLobby()
   const inputRef = useRef(null)
 
   useEffect(() => {
-    if (joinError) {
-      const t = setTimeout(() => setJoinError(''), 3000)
+    if (error) {
+      const t = setTimeout(() => setError(''), 3000)
       return () => clearTimeout(t)
     }
-  }, [joinError])
+  }, [error])
 
-  const handleJoinByCode = () => {
-    const cleaned = joinCode.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
-    if (cleaned.length !== 6) {
-      setJoinError('Code must be 6 characters')
-      return
+  // Detect whether input looks like a 6-char room code
+  const cleaned = input.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')
+  const is6Char = cleaned.length === 6 && input.trim().length === 6
+  const isEmpty = input.trim().length === 0
+
+  // Live-check Ably presence to see if a room with this code exists
+  const { exists: roomExists, memberCount: lookupCount, checking } = useRoomLookup(input)
+
+  // Mode logic:
+  //   empty          → neutral
+  //   6-char + exists → join
+  //   6-char + checking → checking (show spinner)
+  //   anything else   → create (including 6-char codes with no active room)
+  const mode = isEmpty
+    ? 'neutral'
+    : is6Char && checking
+      ? 'checking'
+      : is6Char && roomExists
+        ? 'join'
+        : 'create'
+
+  const handleSubmit = () => {
+    const trimmed = input.trim()
+    if (!trimmed || mode === 'checking') return
+    if (mode === 'join') {
+      onJoinRoom(cleaned)
+    } else {
+      // For 6-char codes that don't match an existing room, create with that specific code
+      onCreateRoom({ isPublic, name: trimmed, ...(is6Char ? { id: cleaned } : {}) })
     }
-    onJoinRoom(cleaned)
-  }
-
-  const handleCreateRoom = () => {
-    onCreateRoom({ isPublic, name: roomName.trim() })
   }
 
   // Sort rooms: most members first
@@ -79,53 +98,74 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
           <ThemeToggle theme={theme} onToggle={onThemeToggle} />
         </div>
 
-        {/* Quick actions — Join (left, smaller) then Create (right, bigger) */}
-        <div className={styles.actions}>
-          {/* Join by code */}
-          <div className={`${styles.card} ${styles.cardJoin}`}>
-            <div className={styles.cardLabel}>JOIN</div>
-            <div className={styles.cardContent}>
-              <p className={styles.cardDesc}>Enter a 6-character room code</p>
-              <div className={styles.joinRow}>
-                <input
-                  ref={inputRef}
-                  className={`${styles.codeInput} ${joinError ? styles.codeInputError : ''}`}
-                  type="text"
-                  placeholder="ABC123"
-                  maxLength={6}
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={joinCode}
-                  onChange={(e) => {
-                    setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))
-                    setJoinError('')
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleJoinByCode()}
-                />
-                <button className="btn btn-blue" onClick={handleJoinByCode}>
-                  JOIN <IconArrowRight />
-                </button>
-              </div>
-              {joinError && <div className={styles.error}>{joinError}</div>}
-            </div>
+        {/* Unified smart box */}
+        <div className={[
+          styles.smartBox,
+          mode === 'join' && styles.smartBoxJoin,
+          mode === 'create' && styles.smartBoxCreate,
+          mode === 'checking' && styles.smartBoxChecking,
+        ].filter(Boolean).join(' ')}>
+          <div className={styles.cardLabel}>
+            {mode === 'join' ? 'JOIN ROOM' : mode === 'checking' ? 'CHECKING…' : mode === 'create' ? 'CREATE ROOM' : 'ENTER ROOM'}
           </div>
+          <div className={styles.cardContent}>
+            <div className={styles.inputRow}>
+              <input
+                ref={inputRef}
+                className={[
+                  styles.smartInput,
+                  (mode === 'join' || mode === 'checking') && styles.smartInputJoin,
+                  mode === 'create' && styles.smartInputCreate,
+                  error && styles.smartInputError,
+                ].filter(Boolean).join(' ')}
+                type="text"
+                placeholder="paste a room code or type a name to create..."
+                maxLength={40}
+                autoComplete="off"
+                spellCheck={false}
+                value={input}
+                onChange={(e) => {
+                  setInput(e.target.value)
+                  setError('')
+                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+              <button
+                className={`btn ${mode === 'join' ? 'btn-blue' : 'btn-amber'}`}
+                disabled={isEmpty || mode === 'checking'}
+                onClick={handleSubmit}
+              >
+                {mode === 'join' ? <>JOIN <IconArrowRight /></> : <>⚡ CREATE</>}
+              </button>
+            </div>
 
-          {/* Create room */}
-          <div className={`${styles.card} ${styles.cardCreate}`}>
-            <div className={styles.cardLabel}>CREATE</div>
-            <div className={styles.cardContent}>
-              <div className={styles.nameRow}>
-                <label className={styles.fieldLabel}>ROOM NAME (OPTIONAL)</label>
-                <input
-                  className={styles.input}
-                  type="text"
-                  placeholder="e.g. Sprint Review, Team Standup..."
-                  maxLength={40}
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                />
-              </div>
+            {/* Hint text */}
+            <div className={styles.hintRow}>
+              {mode === 'checking' && (
+                <span className={styles.hintChecking}>
+                  <span className={styles.dot}>●</span> LOOKING UP ROOM…
+                </span>
+              )}
+              {mode === 'join' && (
+                <span className={styles.hintJoin}>
+                  <IconUsers /> <strong>{lookupCount}</strong> ACTIVE — PRESS ENTER TO JOIN
+                </span>
+              )}
+              {mode === 'create' && is6Char && (
+                <span className={styles.hintCreate}>NO ROOM "{cleaned}" FOUND — THIS WILL CREATE IT</span>
+              )}
+              {mode === 'create' && !is6Char && (
+                <span className={styles.hintCreate}>↵ THIS WILL CREATE A NEW ROOM</span>
+              )}
+              {mode === 'neutral' && (
+                <span className={styles.hintNeutral}>TYPE A 6-CHARACTER CODE TO JOIN, OR A ROOM NAME TO CREATE</span>
+              )}
+            </div>
 
+            {error && <div className={styles.error}>{error}</div>}
+
+            {/* Create-mode options (visibility toggle) — slides in */}
+            <div className={`${styles.createOptions} ${mode === 'create' ? styles.createOptionsVisible : ''}`}>
               <div className={styles.toggleRow}>
                 <span className={styles.toggleLabel}>VISIBILITY</span>
                 <div className={styles.visPills}>
@@ -143,10 +183,6 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
                   </button>
                 </div>
               </div>
-
-              <button className="btn btn-amber" style={{ width: '100%' }} onClick={handleCreateRoom}>
-                ⚡ CREATE ROOM
-              </button>
             </div>
           </div>
         </div>

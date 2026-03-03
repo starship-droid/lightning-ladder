@@ -14,7 +14,15 @@ export default function App() {
   const [roomConfig, setRoomConfig] = useState(null)
 
   const handleCreateRoom = useCallback((config) => {
-    const id = createRoom()
+    // If a specific room ID was requested (e.g. user typed a 6-char code
+    // that doesn't map to an existing room), use it; otherwise generate one.
+    let id
+    if (config.id) {
+      id = config.id
+      joinRoom(id) // navigate to the room
+    } else {
+      id = createRoom()
+    }
     const cfg = { ...config, id }
     roomConfigRef.current = cfg
     setRoomConfig(cfg)
@@ -30,7 +38,7 @@ export default function App() {
         })
       }, 500)
     }
-  }, [createRoom, publishRoomUpdate])
+  }, [createRoom, joinRoom, publishRoomUpdate])
 
   const handleJoinRoom = useCallback((code) => {
     const cfg = { isPublic: false, name: '', id: code }
