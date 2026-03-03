@@ -79,34 +79,34 @@
   color: var(--text-dim);
 }
 
-/* ── Action cards ── */
-.actions {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: 16px;
-  margin-bottom: 36px;
-  align-items: start;
-}
-
-@media (max-width: 600px) {
-  .actions {
-    grid-template-columns: 1fr;
-  }
-}
-
-.card {
+/* ── Smart Box (unified join/create) ── */
+.smartBox {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 24px 20px 20px;
+  padding: 28px 24px 22px;
   position: relative;
+  margin-bottom: 36px;
+  transition: border-color 0.2s, box-shadow 0.25s;
 }
 
-.cardCreate {
-  /* Emphasise the create card */
+.smartBoxJoin {
+  border-color: rgba(77, 166, 255, 0.3);
+  box-shadow: 0 0 24px rgba(77, 166, 255, 0.05);
 }
 
-.cardJoin {
-  /* Compact join card */
+.smartBoxCreate {
+  border-color: rgba(245, 166, 35, 0.3);
+  box-shadow: 0 0 24px rgba(245, 166, 35, 0.05);
+}
+
+.smartBoxChecking {
+  border-color: var(--border-bright);
+  animation: borderPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes borderPulse {
+  0%, 100% { border-color: var(--border); }
+  50% { border-color: var(--border-bright); }
 }
 
 .cardLabel {
@@ -121,34 +121,160 @@
   padding: 2px 10px;
   border: 1px solid var(--border);
   transform: translateY(-50%);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.smartBoxJoin .cardLabel {
+  color: var(--blue);
+  border-color: rgba(77, 166, 255, 0.3);
 }
 
 .cardContent {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
-.cardDesc {
+/* ── Input row ── */
+.inputRow {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.smartInput {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
+  font-size: 14px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, font-family 0.15s, letter-spacing 0.2s;
+  letter-spacing: 0.04em;
+  min-width: 0;
+}
+
+.smartInput::placeholder {
   color: var(--text-dim);
-  line-height: 1.5;
+  font-style: italic;
+  opacity: 0.6;
 }
 
-.cardButtons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.smartInput:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow);
 }
 
-/* ── Create form ── */
-.createForm {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.smartInputJoin {
+  font-family: 'Orbitron', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
+.smartInputJoin:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px var(--blue-glow);
+}
+
+.smartInputCreate:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px var(--amber-glow);
+}
+
+.smartInputError {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--red-glow);
+}
+
+/* ── Hint text ── */
+.hintRow {
+  min-height: 16px;
+  transition: opacity 0.2s;
+}
+
+.hintRow span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  animation: hintFadeIn 0.2s ease;
+}
+
+.hintJoin {
+  color: var(--blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hintJoin svg {
+  stroke: var(--blue);
+}
+
+.hintJoin strong {
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.hintCreate {
+  color: var(--amber);
+}
+
+.hintNeutral {
+  color: var(--text-dim);
+}
+
+.hintChecking {
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  animation: dotPulse 1s ease-in-out infinite;
+  font-size: 8px;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes hintFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Create-mode options (slide in) ── */
+.createOptions {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+  padding-top: 0;
+  border-top: 1px solid transparent;
+}
+
+.createOptionsVisible {
+  max-height: 60px;
+  opacity: 1;
+  padding-top: 12px;
+  border-top-color: var(--border);
+}
+
+.error {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--red);
+}
+
+/* ── Shared form elements ── */
 .toggleRow {
   display: flex;
   align-items: center;
@@ -210,89 +336,6 @@
 
 .visPillActivePublic svg {
   stroke: var(--green);
-}
-
-.nameRow {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.fieldLabel {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  color: var(--text-dim);
-}
-
-.input {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
-  padding: 10px 14px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.input::placeholder {
-  color: var(--text-dim);
-  font-style: italic;
-  opacity: 0.6;
-}
-
-.input:focus {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 2px var(--amber-glow);
-}
-
-/* ── Join by code ── */
-.joinRow {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.codeInput {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-family: 'Orbitron', monospace;
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  padding: 10px 14px;
-  outline: none;
-  text-align: center;
-  text-transform: uppercase;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  min-width: 0;
-}
-
-.codeInput::placeholder {
-  font-size: 14px;
-  letter-spacing: 0.15em;
-  opacity: 0.3;
-  font-weight: 400;
-}
-
-.codeInput:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 2px var(--blue-glow);
-}
-
-.codeInputError {
-  border-color: var(--red);
-  box-shadow: 0 0 0 2px var(--red-glow);
-}
-
-.error {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  color: var(--red);
 }
 
 /* ── Lobby ── */

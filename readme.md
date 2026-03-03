@@ -9,7 +9,9 @@ A real-time, multi-room agenda timer for standups, retros, planning sessions —
 ## Features
 
 ### Multi-Room System
-- **Lobby / Home screen** — create a new room or join an existing one by 6-character code
+- **Smart entry box** — a single unified input that auto-detects intent: type a 6-character code to join an existing room, or type a name to create a new one
+- **Live room lookup** — when a 6-char code is entered, the app probes Ably presence in real time to check if the room exists and shows the active member count
+- **Create with custom codes** — if a 6-char code doesn't match an existing room, it creates a new room with that exact code
 - **Public & Private rooms** — toggle visibility when creating; public rooms appear in the lobby with live member counts
 - **Room names** — optionally name your room (displayed in the lobby and in the room bar)
 - **Shareable links** — copy a room code or direct URL to invite others
@@ -46,7 +48,9 @@ A real-time, multi-room agenda timer for standups, retros, planning sessions —
 ## How It Works
 
 1. Open the app — you land on the **Lobby**
-2. **Create a room** (set a name, choose public or private) or **join by code**
+2. **Type in the smart box** — paste a room code to join, or type a room name to create
+   - If the code matches an active room, you'll see the member count and can join instantly
+   - If the code doesn't match (or you type a name), it creates a new room
 3. Share the 6-character room code or direct link with your team
 4. Everyone types their name and hits **Join** — the queue builds in real time
 5. Hit **▶ Start Session** to kick off the first speaker
@@ -138,12 +142,13 @@ src/
     useAblyNotes.js       # Room-scoped Ably channel for shared notes
     useLobby.js           # Lobby channel — public room list
     useRoom.js            # Hash routing, room ID generation, navigation
+    useRoomLookup.js      # Debounced Ably presence probe — checks if a room exists
     useRoomPresence.js    # Ably presence tracking per room
     useTimer.js           # Countdown timer logic
     useTheme.js           # Dark/light theme toggle
     useToast.js           # Toast notification
   components/
-    HomeScreen.jsx        # Lobby — create room, join by code, public room list
+    HomeScreen.jsx        # Lobby — unified smart input (join/create), public room list
     Room.jsx              # Full room view (queue, timer, notes)
     RoomBar.jsx           # Room header bar (code, name, share buttons, presence)
     Header.jsx            # Logo, connection status, queue count
