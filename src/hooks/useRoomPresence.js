@@ -11,6 +11,7 @@ export function useRoomPresence({ roomId }) {
   const isMounted = useRef(true)
   const [memberCount, setMemberCount] = useState(0)
   const [isLastOne, setIsLastOne] = useState(false)
+  const [presenceReady, setPresenceReady] = useState(false)
 
   useEffect(() => {
     if (!roomId) return
@@ -41,6 +42,7 @@ export function useRoomPresence({ roomId }) {
         if (isMounted.current) {
           setMemberCount(count)
           setIsLastOne(count <= 1)
+          setPresenceReady(true)
         }
       } catch {
         // ignore
@@ -66,5 +68,5 @@ export function useRoomPresence({ roomId }) {
     }
   }, [roomId])
 
-  return { memberCount, isLastOne }
+  return { memberCount, isLastOne, presenceReady }
 }

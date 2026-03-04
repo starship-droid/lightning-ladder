@@ -257,3 +257,14 @@
     font-size: 14px;
   }
 }
+
+/* ── Shimmer placeholder ── */
+.shimmerInline {
+  animation: shimmerPulse 1.4s ease-in-out infinite;
+  opacity: 0.4;
+}
+
+@keyframes shimmerPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}

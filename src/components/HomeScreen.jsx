@@ -33,7 +33,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
   const [input, setInput] = useState('')
   const [isPublic, setIsPublic] = useState(false)
   const [error, setError] = useState('')
-  const { publicRooms } = useLobby()
+  const { publicRooms, lobbyReady } = useLobby()
   const inputRef = useRef(null)
 
   useEffect(() => {
@@ -191,10 +191,27 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
         <div className={styles.lobby}>
           <div className={styles.lobbyHeader}>
             <span className={styles.lobbyTitle}>// PUBLIC ROOMS</span>
-            <span className={styles.lobbyCount}>{sortedRooms.length} ACTIVE</span>
+            {lobbyReady ? (
+              <span className={styles.lobbyCount}>{sortedRooms.length} ACTIVE</span>
+            ) : (
+              <span className={`${styles.lobbyCount} ${styles.shimmerText}`}>— LOADING</span>
+            )}
           </div>
 
-          {sortedRooms.length === 0 ? (
+          {!lobbyReady ? (
+            /* Skeleton placeholder cards while Ably channel is attaching */
+            <div className={styles.roomList}>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={styles.skeletonCard}>
+                  <div className={styles.skeletonInfo}>
+                    <div className={`${styles.skeletonBar} ${styles.skeletonBarWide}`} />
+                    <div className={styles.skeletonBar} />
+                  </div>
+                  <div className={`${styles.skeletonBar} ${styles.skeletonBarCircle}`} />
+                </div>
+              ))}
+            </div>
+          ) : sortedRooms.length === 0 ? (
             <div className={styles.emptyLobby}>
               <div className={styles.emptyIcon}>⚡</div>
               <p>NO PUBLIC ROOMS ACTIVE<br />CREATE ONE TO GET STARTED</p>

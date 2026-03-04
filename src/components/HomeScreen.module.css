@@ -486,3 +486,61 @@
   color: var(--amber);
   font-weight: 400;
 }
+
+/* ── Skeleton / shimmer placeholders ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmerText {
+  animation: shimmerPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmerPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+.skeletonCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.skeletonCard:last-child {
+  border-bottom: none;
+}
+
+.skeletonInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeletonBar {
+  height: 10px;
+  width: 80px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--surface2) 25%,
+    var(--border) 50%,
+    var(--surface2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.skeletonBarWide {
+  width: 140px;
+  height: 14px;
+}
+
+.skeletonBarCircle {
+  width: 28px;
+  height: 12px;
+  border-radius: 6px;
+}

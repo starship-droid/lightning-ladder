@@ -30,7 +30,7 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notesUnread, setNotesUnread] = useState(false)
   const sidebarOpenRef = useRef(false)
-  const { memberCount, isLastOne } = useRoomPresence({ roomId })
+  const { memberCount, isLastOne, presenceReady } = useRoomPresence({ roomId })
   const { publishRoomUpdate } = useLobby()
   const hasHadContentRef = useRef(false)
   const leaveWarningShownRef = useRef(false)
@@ -65,9 +65,12 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
     if (hasContent) hasHadContentRef.current = true
   }, [])
 
-  // Publish room presence updates to lobby if public
+  // Publish room presence updates to lobby if public,
+  // and keep the listing alive with a periodic heartbeat.
   useEffect(() => {
-    if (roomConfig?.isPublic && roomId) {
+    if (!roomConfig?.isPublic || !roomId) return
+
+    const sendUpdate = () => {
       publishRoomUpdate({
         id: roomId,
         name: roomConfig.name || '',
@@ -75,6 +78,14 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
         isPublic: true,
       })
     }
+
+    // Publish immediately on every memberCount change
+    sendUpdate()
+
+    // Re-publish every 60 s so the lobby's rewind buffer stays fresh
+    // and the stale-room pruner doesn't remove this entry.
+    const heartbeat = setInterval(sendUpdate, 60_000)
+    return () => clearInterval(heartbeat)
   }, [memberCount, roomId, roomConfig, publishRoomUpdate])
 
   // Show warning when user is the last one and is about to leave
@@ -88,28 +99,15 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
     }
   }, [isLastOne, showToast])
 
-  // Handle room leave with cleanup logic
+  // Handle room leave.
+  // The lobby entry is kept alive by the heartbeat interval above;
+  // once this component unmounts the heartbeats stop, and the lobby's
+  // stale-room pruner will automatically remove the entry.
   const handleLeave = useCallback(() => {
-    if (hasHadContentRef.current) {
-      // Room had content — it'll be cleaned up 30s after last person leaves
-      // The cleanup happens automatically via presence-based logic
-      if (roomConfig?.isPublic) {
-        // Delay marking as removed so the lobby updates after presence detaches
-        setTimeout(() => {
-          publishRoomUpdate({
-            id: roomId,
-            removed: true,
-          })
-        }, 30000)
-      }
-    } else {
-      // Room was empty / no content — clean immediately
-      if (roomConfig?.isPublic) {
-        publishRoomUpdate({
-          id: roomId,
-          removed: true,
-        })
-      }
+    // If the room is empty (no content), remove it from the lobby immediately
+    // so it doesn't linger for the full stale timeout.
+    if (!hasHadContentRef.current && roomConfig?.isPublic) {
+      publishRoomUpdate({ id: roomId, removed: true })
     }
     onLeave()
   }, [onLeave, roomId, roomConfig, publishRoomUpdate])
@@ -345,6 +343,7 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
           remaining={waiting.length + (active ? 1 : 0)}
           isConnected={isConnected}
           isConnecting={isConnecting}
+          presenceReady={presenceReady}
           theme={theme}
           onThemeToggle={onThemeToggle}
           onLeave={handleLeave}

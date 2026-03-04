@@ -27,7 +27,7 @@ const IconCheck = () => (
   </svg>
 )
 
-export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isConnected, isConnecting, theme, onThemeToggle, onLeave }) {
+export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isConnected, isConnecting, presenceReady, theme, onThemeToggle, onLeave }) {
   const [copied, setCopied] = useState(null) // 'link' | 'code' | null
 
   const copyToClipboard = useCallback((text, type) => {
@@ -106,7 +106,11 @@ export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isC
           <div className={styles.statusSep} />
           <div className={styles.statusItem}>
             <span className={styles.presenceDot} />
-            <span>{memberCount} CONNECTED</span>
+            {presenceReady ? (
+              <span>{memberCount} CONNECTED</span>
+            ) : (
+              <span className={styles.shimmerInline}>—</span>
+            )}
           </div>
           {roomName && (
             <>
@@ -119,7 +123,11 @@ export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isC
         </div>
         <div className={styles.statusRight}>
           <div className={styles.remainingBadge}>
-            <span className={styles.remainingCount}>{remaining}</span>
+            {presenceReady ? (
+              <span className={styles.remainingCount}>{remaining}</span>
+            ) : (
+              <span className={`${styles.remainingCount} ${styles.shimmerInline}`}>—</span>
+            )}
             <span className={styles.remainingLabel}>REMAINING</span>
           </div>
         </div>
