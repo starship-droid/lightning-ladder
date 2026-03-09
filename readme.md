@@ -16,7 +16,10 @@ A real-time, multi-room agenda timer for standups, retros, planning sessions —
 - **Room names** — optionally name your room (displayed in the lobby and in the room bar)
 - **Shareable links** — copy a room code or direct URL to invite others
 - **Presence tracking** — live member count per room via Ably presence
-- **Auto-cleanup** — empty rooms (no names added, no notes typed) are removed immediately; rooms with content are cleaned up 30 seconds after the last person leaves
+- **Auto-cleanup** — empty rooms are removed from the lobby immediately; rooms with content expire **5 minutes** after the last person leaves
+- **My Rooms** — rooms you create are saved locally (via `localStorage`) so you can find and rejoin them from the lobby — even private rooms you've left
+- **Room ownership** — a persistent anonymous ID identifies you as the room creator; an ⚡ OWNER badge appears in the room status bar
+- **Last-person warning** — if you try to leave as the last person, a modal warns you the room will be deleted in 5 minutes and prompts you to save any shared notes first
 - **Room isolation** — each room has its own Ably channels for state, notes, and presence — no cross-room data leaks
 
 ### Speaker Queue & Timer
@@ -143,16 +146,19 @@ src/
     useAbly.js            # Room-scoped Ably connection + pub/sub
     useAblyNotes.js       # Room-scoped Ably channel for shared notes
     useLobby.js           # Lobby channel — public room list
+    useMyRooms.js         # localStorage persistence for created rooms
     useRoom.js            # Hash routing, room ID generation, navigation
     useRoomLookup.js      # Debounced Ably presence probe — checks if a room exists
     useRoomPresence.js    # Ably presence tracking per room
     useTimer.js           # Countdown timer logic
     useTheme.js           # Dark/light theme toggle
     useToast.js           # Toast notification
+    useUserId.js          # Persistent anonymous user ID (room ownership)
   components/
-    HomeScreen.jsx        # Lobby — unified smart input (join/create), public room list
+    HomeScreen.jsx        # Lobby — smart input, My Rooms list, public room list
     Room.jsx              # Full room view (queue, timer, notes)
     RoomBar.jsx           # Room header — name, status, presence, share, remaining, theme
+    LeaveModal.jsx        # Last-person leave warning modal
     Header.jsx            # Lobby logo, connection status, queue count
     JoinSection.jsx       # Name input + timer config
     TimerPanel.jsx        # Active speaker timer + phase controls

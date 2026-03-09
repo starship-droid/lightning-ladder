@@ -344,6 +344,115 @@
   background: var(--surface);
 }
 
+/* ── My Rooms ── */
+.myRooms {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+
+.myRoomCard {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.myRoomCard:last-child {
+  border-bottom: none;
+}
+
+.myRoomMain {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 8px 14px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+  min-width: 0;
+}
+
+.myRoomMain:hover {
+  background: var(--amber-glow);
+}
+
+.myRoomCard:hover .joinArrow {
+  opacity: 1;
+}
+
+.ownerTag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  border: 1px solid var(--amber);
+  padding: 2px 8px;
+  opacity: 0.7;
+}
+
+.badgePrivate,
+.badgePublic {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  margin-left: 10px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.badgePrivate {
+  color: var(--text-dim);
+}
+
+.badgePrivate svg {
+  stroke: var(--text-dim);
+  width: 10px;
+  height: 10px;
+}
+
+.badgePublic {
+  color: var(--green);
+  border-color: rgba(57, 211, 83, 0.25);
+}
+
+.badgePublic svg {
+  stroke: var(--green);
+  width: 10px;
+  height: 10px;
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 100%;
+  min-height: 48px;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.removeBtn:hover {
+  color: var(--red);
+  background: rgba(255, 77, 77, 0.06);
+}
+
+.removeBtn svg {
+  stroke: currentColor;
+}
+
 .lobbyHeader {
   display: flex;
   align-items: center;

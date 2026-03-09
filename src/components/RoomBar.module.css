@@ -172,6 +172,11 @@
   flex-shrink: 0;
 }
 
+.ownerBadge {
+  color: var(--amber);
+  font-weight: 500;
+}
+
 .statusDot {
   width: 6px;
   height: 6px;

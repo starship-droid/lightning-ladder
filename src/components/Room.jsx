@@ -9,6 +9,7 @@ import { TimerPanel } from './TimerPanel'
 import { RosterItem } from './RosterItem'
 import { SharedNotes } from './SharedNotes'
 import { Footer } from './Footer'
+import { LeaveModal } from './LeaveModal'
 import styles from '../App.module.css'
 
 const INITIAL_STATE = {
@@ -21,7 +22,7 @@ const INITIAL_STATE = {
   pausedElapsed: 0,
 }
 
-export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeave }) {
+export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle, onLeave }) {
   const [state, setState]           = useState(INITIAL_STATE)
   const [isConnected, setConnected] = useState(false)
   const [isConnecting, setConnecting] = useState(true)
@@ -35,6 +36,10 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
   const hasHadContentRef = useRef(false)
   const leaveWarningShownRef = useRef(false)
   const notesHaveContentRef = useRef(false)
+  const [showLeaveModal, setShowLeaveModal] = useState(false)
+
+  // Owner check: the user is the owner if they created this room
+  const isOwner = !!(roomConfig?.ownerId && roomConfig.ownerId === userId)
 
   const handleNotesActivity = useCallback(() => {
     if (!sidebarOpenRef.current) setNotesUnread(true)
@@ -88,29 +93,25 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
     return () => clearInterval(heartbeat)
   }, [memberCount, roomId, roomConfig, publishRoomUpdate])
 
-  // Show warning when user is the last one and is about to leave
-  useEffect(() => {
-    if (isLastOne && hasHadContentRef.current && !leaveWarningShownRef.current) {
-      leaveWarningShownRef.current = true
-      showToast('⚠ You are the last person in this room. Room will close 30s after you leave.')
-    }
-    if (!isLastOne) {
-      leaveWarningShownRef.current = false
-    }
-  }, [isLastOne, showToast])
 
-  // Handle room leave.
-  // The lobby entry is kept alive by the heartbeat interval above;
-  // once this component unmounts the heartbeats stop, and the lobby's
-  // stale-room pruner will automatically remove the entry.
   const handleLeave = useCallback(() => {
+    // If this user is the last person, show a warning modal first
+    if (isLastOne) {
+      setShowLeaveModal(true)
+      return
+    }
+    doLeave()
+  }, [isLastOne]) // eslint-disable-line
+
+  const doLeave = useCallback(() => {
+    setShowLeaveModal(false)
     // If the room is empty (no content), remove it from the lobby immediately
     // so it doesn't linger for the full stale timeout.
     if (!hasHadContentRef.current && roomConfig?.isPublic) {
       publishRoomUpdate({ id: roomId, removed: true })
     }
-    onLeave()
-  }, [onLeave, roomId, roomConfig, publishRoomUpdate])
+    onLeave(isLastOne)
+  }, [onLeave, roomId, roomConfig, publishRoomUpdate, isLastOne])
 
   // Sync state + publish to Ably
   const updateState = useCallback((updater) => {
@@ -344,6 +345,7 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
           isConnected={isConnected}
           isConnecting={isConnecting}
           presenceReady={presenceReady}
+          isOwner={isOwner}
           theme={theme}
           onThemeToggle={onThemeToggle}
           onLeave={handleLeave}
@@ -429,6 +431,14 @@ export function Room({ roomId, roomUrl, roomConfig, theme, onThemeToggle, onLeav
         {/* Toast */}
         <div className={`toast ${toastVisible ? 'show' : ''}`}>{toastMsg}</div>
       </div>
+
+      {/* Last-person leave warning modal */}
+      {showLeaveModal && (
+        <LeaveModal
+          onStay={() => setShowLeaveModal(false)}
+          onLeave={doLeave}
+        />
+      )}
     </div>
   )
 }

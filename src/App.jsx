@@ -2,6 +2,8 @@ import { useCallback, useRef, useState } from 'react'
 import { useRoom } from './hooks/useRoom'
 import { useTheme } from './hooks/useTheme'
 import { useLobby } from './hooks/useLobby'
+import { useMyRooms } from './hooks/useMyRooms'
+import { useUserId } from './hooks/useUserId'
 import { HomeScreen } from './components/HomeScreen'
 import { Room } from './components/Room'
 import './index.css'
@@ -10,6 +12,8 @@ export default function App() {
   const { theme, toggleTheme } = useTheme()
   const { roomId, view, createRoom, joinRoom, goHome, getRoomUrl } = useRoom()
   const { publishRoomUpdate } = useLobby()
+  const { myRooms, addRoom, removeRoom, markRoomLeft, refreshRoom } = useMyRooms()
+  const userId = useUserId()
   const roomConfigRef = useRef(null)
   const [roomConfig, setRoomConfig] = useState(null)
 
@@ -23,9 +27,12 @@ export default function App() {
     } else {
       id = createRoom()
     }
-    const cfg = { ...config, id }
+    const cfg = { ...config, id, ownerId: userId }
     roomConfigRef.current = cfg
     setRoomConfig(cfg)
+
+    // Save to "My Rooms" so the user can find it again after leaving
+    addRoom({ id, name: config.name || '', isPublic: !!config.isPublic })
 
     // If public, announce to lobby
     if (config.isPublic) {
@@ -38,20 +45,25 @@ export default function App() {
         })
       }, 500)
     }
-  }, [createRoom, joinRoom, publishRoomUpdate])
+  }, [createRoom, joinRoom, publishRoomUpdate, addRoom, userId])
 
   const handleJoinRoom = useCallback((code) => {
+    refreshRoom(code) // clear stale timer if this is a saved room
     const cfg = { isPublic: false, name: '', id: code }
     roomConfigRef.current = cfg
     setRoomConfig(cfg)
     joinRoom(code)
-  }, [joinRoom])
+  }, [joinRoom, refreshRoom])
 
-  const handleLeave = useCallback(() => {
+  const handleLeave = useCallback((wasEmpty) => {
+    const leavingRoomId = roomConfigRef.current?.id
+    if (leavingRoomId) {
+      markRoomLeft(leavingRoomId, !!wasEmpty)
+    }
     roomConfigRef.current = null
     setRoomConfig(null)
     goHome()
-  }, [goHome])
+  }, [goHome, markRoomLeft])
 
   if (view === 'room' && roomId) {
     return (
@@ -59,6 +71,7 @@ export default function App() {
         roomId={roomId}
         roomUrl={getRoomUrl()}
         roomConfig={roomConfig}
+        userId={userId}
         theme={theme}
         onThemeToggle={toggleTheme}
         onLeave={handleLeave}
@@ -70,6 +83,8 @@ export default function App() {
     <HomeScreen
       onCreateRoom={handleCreateRoom}
       onJoinRoom={handleJoinRoom}
+      myRooms={myRooms}
+      onRemoveMyRoom={removeRoom}
       theme={theme}
       onThemeToggle={toggleTheme}
     />

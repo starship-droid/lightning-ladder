@@ -4,7 +4,7 @@ import Ably from 'ably'
 const LOBBY_CHANNEL = 'lightning-ladder__lobby'
 
 /** Rooms not updated within this window are considered stale and pruned */
-const STALE_TIMEOUT_MS = 150_000 // 2.5 minutes
+const STALE_TIMEOUT_MS = 300_000 // 5 minutes
 const STALE_CHECK_INTERVAL_MS = 30_000 // check every 30 s
 
 /**

@@ -29,7 +29,13 @@ const IconGlobe = () => (
   </svg>
 )
 
-export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
+const IconTrash = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" />
+  </svg>
+)
+
+export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyRoom, theme, onThemeToggle }) {
   const [input, setInput] = useState('')
   const [isPublic, setIsPublic] = useState(false)
   const [error, setError] = useState('')
@@ -187,6 +193,52 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
           </div>
         </div>
 
+        {/* My Rooms */}
+        {myRooms.length > 0 && (
+          <div className={styles.myRooms}>
+            <div className={styles.lobbyHeader}>
+              <span className={styles.lobbyTitle}>// MY ROOMS</span>
+              <span className={styles.lobbyCount}>{myRooms.length} SAVED</span>
+            </div>
+            <div className={styles.roomList}>
+              {myRooms.map((room) => (
+                <div key={room.id} className={styles.myRoomCard}>
+                  <button
+                    className={styles.myRoomMain}
+                    onClick={() => onJoinRoom(room.id)}
+                  >
+                    <div className={styles.roomInfo}>
+                      <div className={styles.roomName}>
+                        {room.name || `ROOM ${room.id}`}
+                      </div>
+                      <div className={styles.roomCode}>
+                        {room.id}
+                        <span className={room.isPublic ? styles.badgePublic : styles.badgePrivate}>
+                          {room.isPublic ? <><IconGlobe /> PUBLIC</> : <><IconLock /> PRIVATE</>}
+                        </span>
+                      </div>
+                    </div>
+                    <div className={styles.roomMeta}>
+                      <span className={styles.ownerTag}>OWNER</span>
+                      <span className={styles.joinArrow}><IconArrowRight /></span>
+                    </div>
+                  </button>
+                  <button
+                    className={styles.removeBtn}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemoveMyRoom(room.id)
+                    }}
+                    title="Remove from My Rooms"
+                  >
+                    <IconTrash />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Public rooms lobby */}
         <div className={styles.lobby}>
           <div className={styles.lobbyHeader}>
@@ -245,7 +297,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, theme, onThemeToggle }) {
 
         {/* Version footer */}
         <div className={styles.versionFooter}>
-          ⚡ LIGHTNING LADDER &nbsp;·&nbsp; <strong>v3.0</strong>
+          ⚡ LIGHTNING LADDER &nbsp;·&nbsp; <strong>v3.2</strong>
         </div>
       </div>
     </div>

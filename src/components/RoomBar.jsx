@@ -27,7 +27,7 @@ const IconCheck = () => (
   </svg>
 )
 
-export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isConnected, isConnecting, presenceReady, theme, onThemeToggle, onLeave }) {
+export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isConnected, isConnecting, presenceReady, isOwner, theme, onThemeToggle, onLeave }) {
   const [copied, setCopied] = useState(null) // 'link' | 'code' | null
 
   const copyToClipboard = useCallback((text, type) => {
@@ -112,6 +112,14 @@ export function RoomBar({ roomId, roomUrl, roomName, memberCount, remaining, isC
               <span className={styles.shimmerInline}>—</span>
             )}
           </div>
+          {isOwner && (
+            <>
+              <div className={styles.statusSep} />
+              <div className={`${styles.statusItem} ${styles.ownerBadge}`}>
+                <span>⚡ OWNER</span>
+              </div>
+            </>
+          )}
           {roomName && (
             <>
               <div className={styles.statusSep} />
