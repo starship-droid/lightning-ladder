@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRoom } from './hooks/useRoom'
 import { useTheme } from './hooks/useTheme'
 import { useLobby } from './hooks/useLobby'
@@ -27,7 +27,7 @@ export default function App() {
     } else {
       id = createRoom()
     }
-    const cfg = { ...config, id, ownerId: userId }
+    const cfg = { ...config, id, ownerId: userId, isNew: true }
     roomConfigRef.current = cfg
     setRoomConfig(cfg)
 
@@ -47,13 +47,40 @@ export default function App() {
     }
   }, [createRoom, joinRoom, publishRoomUpdate, addRoom, userId])
 
-  const handleJoinRoom = useCallback((code) => {
+  const handleJoinRoom = useCallback((code, opts = {}) => {
     refreshRoom(code) // clear stale timer if this is a saved room
-    const cfg = { isPublic: false, name: '', id: code }
+    const cfg = {
+      id: code,
+      name: opts.name || '',
+      isPublic: !!opts.isPublic,
+      ...(opts.isOwner ? { ownerId: userId } : {}),
+    }
     roomConfigRef.current = cfg
     setRoomConfig(cfg)
     joinRoom(code)
-  }, [joinRoom, refreshRoom])
+  }, [joinRoom, refreshRoom, userId])
+
+  // Restore roomConfig from myRooms when navigating directly to a room URL
+  // (e.g. back button, shared link, or page refresh while in a room)
+  useEffect(() => {
+    if (view === 'room' && roomId && !roomConfigRef.current) {
+      const stored = myRooms.find((r) => r.id === roomId)
+      if (stored) {
+        const cfg = { id: stored.id, name: stored.name, isPublic: stored.isPublic, ownerId: userId }
+        roomConfigRef.current = cfg
+        setRoomConfig(cfg)
+      }
+    }
+  }, [view, roomId]) // eslint-disable-line
+
+  // Remove from My Rooms and also evict from the public lobby if it was public
+  const handleRemoveRoom = useCallback((id) => {
+    const room = myRooms.find((r) => r.id === id)
+    if (room?.isPublic) {
+      publishRoomUpdate({ id, removed: true })
+    }
+    removeRoom(id)
+  }, [myRooms, removeRoom, publishRoomUpdate])
 
   const handleLeave = useCallback((wasEmpty) => {
     const leavingRoomId = roomConfigRef.current?.id
@@ -84,7 +111,7 @@ export default function App() {
       onCreateRoom={handleCreateRoom}
       onJoinRoom={handleJoinRoom}
       myRooms={myRooms}
-      onRemoveMyRoom={removeRoom}
+      onRemoveMyRoom={handleRemoveRoom}
       theme={theme}
       onThemeToggle={toggleTheme}
     />

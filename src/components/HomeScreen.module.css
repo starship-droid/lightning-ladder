@@ -453,6 +453,101 @@
   stroke: currentColor;
 }
 
+.removeBtnActive {
+  color: var(--red);
+  background: rgba(255, 77, 77, 0.06);
+  border-left-color: rgba(255, 77, 77, 0.3);
+}
+
+.myRoomCardConfirming {
+  border-bottom: none;
+}
+
+/* ── Inline confirm bar ── */
+.confirmBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.confirmText {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.confirmBlocked {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  flex: 1;
+}
+
+.confirmYes {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  padding: 5px 14px;
+  background: rgba(255, 59, 59, 0.1);
+  border: 1px solid rgba(255, 59, 59, 0.35);
+  color: var(--red);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.confirmYes:hover {
+  background: rgba(255, 59, 59, 0.2);
+}
+
+.confirmNo {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  padding: 5px 14px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.confirmNo:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.myRoomAction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  min-height: 48px;
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.myRoomAction:hover {
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.myRoomAction svg {
+  stroke: currentColor;
+}
+
 .lobbyHeader {
   display: flex;
   align-items: center;
@@ -594,6 +689,26 @@
 .versionFooter strong {
   color: var(--amber);
   font-weight: 400;
+}
+
+.githubLink {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.githubLink:hover {
+  color: var(--amber);
+}
+
+.lobbyLink {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.lobbyLink:hover {
+  color: var(--amber);
 }
 
 /* ── Skeleton / shimmer placeholders ── */

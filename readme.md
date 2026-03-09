@@ -17,9 +17,11 @@ A real-time, multi-room agenda timer for standups, retros, planning sessions —
 - **Shareable links** — copy a room code or direct URL to invite others
 - **Presence tracking** — live member count per room via Ably presence
 - **Auto-cleanup** — empty rooms are removed from the lobby immediately; rooms with content expire **5 minutes** after the last person leaves
-- **My Rooms** — rooms you create are saved locally (via `localStorage`) so you can find and rejoin them from the lobby — even private rooms you've left
-- **Room ownership** — a persistent anonymous ID identifies you as the room creator; an ⚡ OWNER badge appears in the room status bar
+- **My Rooms** — rooms you create are saved locally (via `localStorage`) so you can find and rejoin them from the lobby — even private rooms you've left; each entry shows public/private badge, copy-code/copy-link buttons, and a guarded delete
+- **Room ownership** — a persistent anonymous ID identifies you as the room creator; an ⚡ OWNER badge appears in the room status bar; room name is stored in shared state so link-joiners always see the name, not just the code
+- **Fresh-room guarantee** — recreating a room with the same code always starts clean, overwriting any stale Ably history
 - **Last-person warning** — if you try to leave as the last person, a modal warns you the room will be deleted in 5 minutes and prompts you to save any shared notes first
+- **Room deletion guard** — the delete button on My Rooms requires confirmation; deletion is blocked while any member is still active in the room
 - **Room isolation** — each room has its own Ably channels for state, notes, and presence — no cross-room data leaks
 
 ### Speaker Queue & Timer
@@ -46,6 +48,7 @@ A real-time, multi-room agenda timer for standups, retros, planning sessions —
 - **Unified room bar** — room name, connection status, member count, remaining speakers, share buttons, and theme toggle all in one header
 - **Dark / Light theme** — toggle with system preference detection
 - **Sync status** — footer shows live connection state and app version
+- **Footer links** — ⚡ Lightning Ladder navigates to the lobby; GitHub repo link in both the lobby and room footers
 - **Consistent SVG stroke icons** throughout (no emoji mix)
 
 ---

@@ -20,6 +20,7 @@ const INITIAL_STATE = {
   timerRunning: false,
   activeStartedAt: null,
   pausedElapsed: 0,
+  roomName: '',
 }
 
 export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle, onLeave }) {
@@ -56,6 +57,29 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
 
   const publishRef = useRef(null)
   const dragRef = useRef(null)
+  const publishedCleanRef = useRef(false)
+
+  // When this is a brand-new room (isNew), wipe any stale Ably history by
+  // immediately publishing a clean initial state once we're connected.
+  useEffect(() => {
+    if (!roomConfig?.isNew || !ready || publishedCleanRef.current || !publishRef.current) return
+    publishedCleanRef.current = true
+    const fresh = { ...INITIAL_STATE, roomName: roomConfig.name || '' }
+    setState(fresh)
+    publishRef.current(fresh)
+  }, [ready]) // eslint-disable-line
+
+  // Owner: seed roomName into shared state so link-joiners and returning
+  // members see the room name even without localStorage.
+  useEffect(() => {
+    if (!isOwner || !roomConfig?.name || !publishRef.current) return
+    setState((prev) => {
+      if (prev.roomName === roomConfig.name) return prev
+      const next = { ...prev, roomName: roomConfig.name }
+      setTimeout(() => publishRef.current?.(next), 0)
+      return next
+    })
+  }, [isOwner, roomConfig?.name]) // eslint-disable-line
 
   // Track if room has had meaningful content (names added or notes typed)
   useEffect(() => {
@@ -339,7 +363,7 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
         <RoomBar
           roomId={roomId}
           roomUrl={roomUrl}
-          roomName={roomConfig?.name || ''}
+          roomName={state.roomName || roomConfig?.name || ''}
           memberCount={memberCount}
           remaining={waiting.length + (active ? 1 : 0)}
           isConnected={isConnected}

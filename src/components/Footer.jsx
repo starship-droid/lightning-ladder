@@ -1,6 +1,6 @@
 import styles from './Footer.module.css'
 
-const VERSION = 'v3.2'
+const VERSION = 'v3.3'
 
 export function Footer({ isConnected, isConnecting }) {
   const dotClass = isConnecting
@@ -14,7 +14,17 @@ export function Footer({ isConnected, isConnecting }) {
   return (
     <footer className={styles.footer}>
       <div className={styles.versionTag}>
-        ⚡ LIGHTNING LADDER &nbsp;·&nbsp; <strong>{VERSION}</strong>
+        <a href="#" className={styles.footerLink}>⚡ LIGHTNING LADDER</a>
+        &nbsp;·&nbsp; <strong>{VERSION}</strong>
+        &nbsp;·&nbsp;
+        <a
+          href="https://github.com/starship-droid/lightning-ladder"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.footerLink}
+        >
+          GitHub ↗
+        </a>
       </div>
       <div className={styles.syncStatus}>
         <div className={`${styles.syncDot} ${dotClass}`} />

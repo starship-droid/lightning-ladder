@@ -21,6 +21,16 @@
   font-weight: 400;
 }
 
+.footerLink {
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.footerLink:hover {
+  color: var(--amber);
+}
+
 .syncStatus {
   font-family: 'Share Tech Mono', monospace;
   font-size: 10px;

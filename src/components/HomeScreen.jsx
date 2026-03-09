@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLobby } from '../hooks/useLobby'
 import { useRoomLookup } from '../hooks/useRoomLookup'
 import { ThemeToggle } from './ThemeToggle'
@@ -35,12 +35,49 @@ const IconTrash = () => (
   </svg>
 )
 
+const IconCopy = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+)
+
+const IconLink = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+)
+
+const IconCheck = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
 export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyRoom, theme, onThemeToggle }) {
   const [input, setInput] = useState('')
   const [isPublic, setIsPublic] = useState(false)
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(null) // { id, type: 'code'|'link' }
+  const [confirmingId, setConfirmingId] = useState(null)
   const { publicRooms, lobbyReady } = useLobby()
   const inputRef = useRef(null)
+
+  const handleCopy = useCallback((text, id, type) => {
+    const write = () => { setCopied({ id, type }); setTimeout(() => setCopied(null), 2000) }
+    navigator.clipboard.writeText(text).then(write).catch(() => {
+      try {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        document.body.appendChild(ta)
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+      } catch {}
+      write()
+    })
+  }, [])
+
+  const getRoomUrl = (id) => `${window.location.origin}${window.location.pathname}#/room/${id}`
 
   useEffect(() => {
     if (error) {
@@ -74,7 +111,8 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
     const trimmed = input.trim()
     if (!trimmed || mode === 'checking') return
     if (mode === 'join') {
-      onJoinRoom(cleaned)
+      const match = publicRooms.find((r) => r.id === cleaned)
+      onJoinRoom(cleaned, match ? { name: match.name, isPublic: true } : {})
     } else {
       // For 6-char codes that don't match an existing room, create with that specific code
       onCreateRoom({ isPublic, name: trimmed, ...(is6Char ? { id: cleaned } : {}) })
@@ -201,40 +239,83 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
               <span className={styles.lobbyCount}>{myRooms.length} SAVED</span>
             </div>
             <div className={styles.roomList}>
-              {myRooms.map((room) => (
-                <div key={room.id} className={styles.myRoomCard}>
-                  <button
-                    className={styles.myRoomMain}
-                    onClick={() => onJoinRoom(room.id)}
-                  >
-                    <div className={styles.roomInfo}>
-                      <div className={styles.roomName}>
-                        {room.name || `ROOM ${room.id}`}
-                      </div>
-                      <div className={styles.roomCode}>
-                        {room.id}
-                        <span className={room.isPublic ? styles.badgePublic : styles.badgePrivate}>
-                          {room.isPublic ? <><IconGlobe /> PUBLIC</> : <><IconLock /> PRIVATE</>}
-                        </span>
-                      </div>
+              {myRooms.map((room) => {
+                const isConfirming = confirmingId === room.id
+                const publicEntry = publicRooms.find((r) => r.id === room.id)
+                const isOccupied = publicEntry && (publicEntry.memberCount || 0) > 0
+                return (
+                  <div key={room.id}>
+                    <div className={`${styles.myRoomCard} ${isConfirming ? styles.myRoomCardConfirming : ''}`}>
+                      <button
+                        className={styles.myRoomMain}
+                        onClick={() => onJoinRoom(room.id, { name: room.name, isPublic: room.isPublic, isOwner: true })}
+                      >
+                        <div className={styles.roomInfo}>
+                          <div className={styles.roomName}>
+                            {room.name || `ROOM ${room.id}`}
+                          </div>
+                          <div className={styles.roomCode}>
+                            {room.id}
+                            <span className={room.isPublic ? styles.badgePublic : styles.badgePrivate}>
+                              {room.isPublic ? <><IconGlobe /> PUBLIC</> : <><IconLock /> PRIVATE</>}
+                            </span>
+                          </div>
+                        </div>
+                        <div className={styles.roomMeta}>
+                          <span className={styles.ownerTag}>OWNER</span>
+                          <span className={styles.joinArrow}><IconArrowRight /></span>
+                        </div>
+                      </button>
+                      <button
+                        className={styles.myRoomAction}
+                        onClick={(e) => { e.stopPropagation(); handleCopy(room.id, room.id, 'code') }}
+                        title="Copy room code"
+                      >
+                        {copied?.id === room.id && copied?.type === 'code' ? <IconCheck /> : <IconCopy />}
+                      </button>
+                      <button
+                        className={styles.myRoomAction}
+                        onClick={(e) => { e.stopPropagation(); handleCopy(getRoomUrl(room.id), room.id, 'link') }}
+                        title="Copy room link"
+                      >
+                        {copied?.id === room.id && copied?.type === 'link' ? <IconCheck /> : <IconLink />}
+                      </button>
+                      <button
+                        className={`${styles.removeBtn} ${isConfirming ? styles.removeBtnActive : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setConfirmingId(isConfirming ? null : room.id)
+                        }}
+                        title={isConfirming ? 'Cancel' : 'Delete room'}
+                      >
+                        <IconTrash />
+                      </button>
                     </div>
-                    <div className={styles.roomMeta}>
-                      <span className={styles.ownerTag}>OWNER</span>
-                      <span className={styles.joinArrow}><IconArrowRight /></span>
-                    </div>
-                  </button>
-                  <button
-                    className={styles.removeBtn}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onRemoveMyRoom(room.id)
-                    }}
-                    title="Remove from My Rooms"
-                  >
-                    <IconTrash />
-                  </button>
-                </div>
-              ))}
+                    {isConfirming && (
+                      <div className={styles.confirmBar}>
+                        {isOccupied ? (
+                          <span className={styles.confirmBlocked}>
+                            ⚠ {publicEntry.memberCount} PEOPLE ARE ACTIVE — CANNOT DELETE
+                          </span>
+                        ) : (
+                          <>
+                            <span className={styles.confirmText}>REMOVE THIS ROOM FROM YOUR LIST?</span>
+                            <button
+                              className={styles.confirmYes}
+                              onClick={() => { onRemoveMyRoom(room.id); setConfirmingId(null) }}
+                            >
+                              CONFIRM
+                            </button>
+                          </>
+                        )}
+                        <button className={styles.confirmNo} onClick={() => setConfirmingId(null)}>
+                          CANCEL
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
@@ -274,7 +355,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
                 <button
                   key={room.id}
                   className={styles.roomCard}
-                  onClick={() => onJoinRoom(room.id)}
+                  onClick={() => onJoinRoom(room.id, { name: room.name, isPublic: true })}
                 >
                   <div className={styles.roomInfo}>
                     <div className={styles.roomName}>
@@ -297,7 +378,17 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
 
         {/* Version footer */}
         <div className={styles.versionFooter}>
-          ⚡ LIGHTNING LADDER &nbsp;·&nbsp; <strong>v3.2</strong>
+          <a href="#" className={styles.lobbyLink}>⚡ LIGHTNING LADDER</a>
+          &nbsp;·&nbsp; <strong>v3.3</strong>
+          &nbsp;·&nbsp;
+          <a
+            href="https://github.com/starship-droid/lightning-ladder"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.githubLink}
+          >
+            GitHub ↗
+          </a>
         </div>
       </div>
     </div>
