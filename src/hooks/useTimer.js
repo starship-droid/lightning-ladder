@@ -34,25 +34,38 @@ export function useTimer({ state }) {
 
     const mins    = state.phase === 'qa' ? (state.qaMins || 5) : (state.presentMins || 5)
     const total   = mins * 60
-    const elapsed = Math.floor((Date.now() - state.activeStartedAt) / 1000)
-    const remaining = Math.max(0, total - elapsed)
 
+    // Always derive remaining time from wall-clock so drift is impossible
+    const getRemaining = () => {
+      const elapsed = Math.floor((Date.now() - state.activeStartedAt) / 1000)
+      return Math.max(0, total - elapsed)
+    }
+
+    const remaining = getRemaining()
     setTotalSecs(total)
     setSecsLeft(remaining)
 
     if (remaining <= 0) return // already expired, parent handles
 
+    // Each tick recomputes from wall-clock — self-corrects throttled intervals
     intervalRef.current = setInterval(() => {
-      setSecsLeft((prev) => {
-        if (prev <= 1) {
-          clearTimer()
-          return 0
-        }
-        return prev - 1
-      })
+      const r = getRemaining()
+      setSecsLeft(r)
+      if (r <= 0) clearTimer()
     }, 1000)
 
-    return clearTimer
+    // Immediately re-sync when the tab becomes visible after sleeping/backgrounding
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setSecsLeft(getRemaining())
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      clearTimer()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [
     state.timerRunning,
     state.activeStartedAt,
