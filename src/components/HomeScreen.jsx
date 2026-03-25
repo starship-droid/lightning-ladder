@@ -94,16 +94,22 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
   // Live-check Ably presence to see if a room with this code exists
   const { exists: roomExists, memberCount: lookupCount, checking } = useRoomLookup(input)
 
+  // If the typed 6-char code matches a room the user owns, always treat it as
+  // a join — even when Ably presence is 0 (everyone left but Ably still has
+  // the last state in its rewind buffer).  Falling through to 'create' would
+  // call handleCreateRoom with isNew:true and wipe the session for everyone.
+  const savedRoom = is6Char ? myRooms.find((r) => r.id === cleaned) : null
+
   // Mode logic:
-  //   empty          → neutral
-  //   6-char + exists → join
-  //   6-char + checking → checking (show spinner)
-  //   anything else   → create (including 6-char codes with no active room)
+  //   empty                      → neutral
+  //   6-char + checking          → checking (show spinner)
+  //   6-char + exists or saved   → join
+  //   anything else              → create
   const mode = isEmpty
     ? 'neutral'
     : is6Char && checking
       ? 'checking'
-      : is6Char && roomExists
+      : is6Char && (roomExists || savedRoom)
         ? 'join'
         : 'create'
 
@@ -111,8 +117,15 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
     const trimmed = input.trim()
     if (!trimmed || mode === 'checking') return
     if (mode === 'join') {
-      const match = publicRooms.find((r) => r.id === cleaned)
-      onJoinRoom(cleaned, match ? { name: match.name, isPublic: true } : {})
+      const publicMatch = publicRooms.find((r) => r.id === cleaned)
+      if (publicMatch) {
+        onJoinRoom(cleaned, { name: publicMatch.name, isPublic: true })
+      } else if (savedRoom) {
+        // Owner rejoining their own room (possibly with 0 active members)
+        onJoinRoom(cleaned, { name: savedRoom.name, isPublic: savedRoom.isPublic, isOwner: true })
+      } else {
+        onJoinRoom(cleaned, {})
+      }
     } else {
       // For 6-char codes that don't match an existing room, create with that specific code
       onCreateRoom({ isPublic, name: trimmed, ...(is6Char ? { id: cleaned } : {}) })
@@ -190,7 +203,12 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
                   <span className={styles.dot}>●</span> LOOKING UP ROOM…
                 </span>
               )}
-              {mode === 'join' && (
+              {mode === 'join' && savedRoom && !roomExists && (
+                <span className={styles.hintJoin}>
+                  YOUR ROOM — PRESS ENTER TO REJOIN
+                </span>
+              )}
+              {mode === 'join' && roomExists && (
                 <span className={styles.hintJoin}>
                   <IconUsers /> <strong>{lookupCount}</strong> ACTIVE — PRESS ENTER TO JOIN
                 </span>

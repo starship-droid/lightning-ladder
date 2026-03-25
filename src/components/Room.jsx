@@ -150,14 +150,29 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
 
   // Handle incoming remote state
   // messageTimestamp is the Ably server-side timestamp (ms since epoch).
-  // We use it to re-anchor activeStartedAt to *this* device's local clock so
-  // that clock skew between the publishing device and this one is cancelled out.
+  // We use it to re-anchor activeStartedAt to *this* device's local clock.
+  //
+  // The key insight: for Ably *rewind* messages the timestamp is the original
+  // publish time, not the delivery time.  The old formula only subtracted
+  // (messageTimestamp − activeStartedAt), which ≈ 0 when the timer-start state
+  // was published the instant the timer began — making every refresh appear to
+  // restart the timer from full.
+  //
+  // Correct formula accounts for both clock skew AND message age:
+  //   elapsedAtPublish = messageTimestamp − activeStartedAt   (skew-corrected elapsed at publish)
+  //   timeSincePublish = Date.now()       − messageTimestamp  (how stale the message is)
+  //   totalElapsed     = elapsedAtPublish + timeSincePublish
+  //                    = Date.now()       − activeStartedAt
+  // → adjusted.activeStartedAt = Date.now() − totalElapsed = activeStartedAt (publisher's clock)
+  //   which is correct when both clocks are in sync, and degrades gracefully if not.
   const handleRemoteState = useCallback((remote, messageTimestamp) => {
     if (!remote || !remote.speakers) return
     let adjusted = remote
     if (remote.timerRunning && remote.activeStartedAt && messageTimestamp) {
-      const elapsedAtDelivery = messageTimestamp - remote.activeStartedAt
-      adjusted = { ...remote, activeStartedAt: Date.now() - elapsedAtDelivery }
+      const elapsedAtPublish  = messageTimestamp - remote.activeStartedAt
+      const timeSincePublish  = Date.now() - messageTimestamp
+      const totalElapsed      = elapsedAtPublish + timeSincePublish
+      adjusted = { ...remote, activeStartedAt: Date.now() - totalElapsed }
     }
     setState(adjusted)
     if (!ready) setReady(true)
