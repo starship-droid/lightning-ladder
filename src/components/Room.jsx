@@ -81,7 +81,6 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
       if (prev.roomName === roomConfig.name) return prev
       return { ...prev, roomName: roomConfig.name }
     })
-    })
   }, [isOwner, roomConfig?.name]) // eslint-disable-line
 
   // Track if room has had meaningful content (names added or notes typed)
