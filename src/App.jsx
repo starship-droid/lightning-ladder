@@ -73,6 +73,17 @@ export default function App() {
     }
   }, [view, roomId]) // eslint-disable-line
 
+  // When the owner navigates away from the room without using the leave button
+  // (e.g. browser back/forward), clear isNew so it doesn't re-fire on the next
+  // Room mount and wipe the Ably channel state for everyone.
+  useEffect(() => {
+    if (view !== 'room' && roomConfigRef.current?.isNew) {
+      const updated = { ...roomConfigRef.current, isNew: false }
+      roomConfigRef.current = updated
+      setRoomConfig(updated)
+    }
+  }, [view]) // eslint-disable-line
+
   // Remove from My Rooms and also evict from the public lobby if it was public
   const handleRemoveRoom = useCallback((id) => {
     const room = myRooms.find((r) => r.id === id)
