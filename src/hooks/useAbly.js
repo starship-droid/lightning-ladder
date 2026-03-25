@@ -45,9 +45,11 @@ export function useAbly({ roomId, onStateUpdate, onConnected, onDisconnected }) 
     channelRef.current = channel
 
     // Subscribe to state updates (including the rewound initial state)
+    // message.timestamp is the Ably server-side time — a neutral clock reference
+    // that callers can use to compensate for skew between publisher & subscriber clocks.
     channel.subscribe('state', (message) => {
       if (isMounted.current && message.data) {
-        onStateUpdate?.(message.data)
+        onStateUpdate?.(message.data, message.timestamp)
       }
     })
 

@@ -69,15 +69,17 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     publishRef.current(fresh)
   }, [ready]) // eslint-disable-line
 
-  // Owner: seed roomName into shared state so link-joiners and returning
-  // members see the room name even without localStorage.
+  // Owner: ensure roomName is reflected in local state if it arrives via
+  // roomConfig before the Ably rewind message is delivered.
+  // NOTE: we deliberately do NOT publish here — the isNew effect handles the
+  // initial publish, and any subsequent updateState call carries roomName.
+  // Publishing here would overwrite the real persisted state with an empty
+  // speakers list before Ably has had a chance to rewind it.
   useEffect(() => {
-    if (!isOwner || !roomConfig?.name || !publishRef.current) return
+    if (!isOwner || !roomConfig?.name) return
     setState((prev) => {
       if (prev.roomName === roomConfig.name) return prev
-      const next = { ...prev, roomName: roomConfig.name }
-      setTimeout(() => publishRef.current?.(next), 0)
-      return next
+      return { ...prev, roomName: roomConfig.name }
     })
   }, [isOwner, roomConfig?.name]) // eslint-disable-line
 
@@ -147,9 +149,17 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   }, [])
 
   // Handle incoming remote state
-  const handleRemoteState = useCallback((remote) => {
+  // messageTimestamp is the Ably server-side timestamp (ms since epoch).
+  // We use it to re-anchor activeStartedAt to *this* device's local clock so
+  // that clock skew between the publishing device and this one is cancelled out.
+  const handleRemoteState = useCallback((remote, messageTimestamp) => {
     if (!remote || !remote.speakers) return
-    setState(remote)
+    let adjusted = remote
+    if (remote.timerRunning && remote.activeStartedAt && messageTimestamp) {
+      const elapsedAtDelivery = messageTimestamp - remote.activeStartedAt
+      adjusted = { ...remote, activeStartedAt: Date.now() - elapsedAtDelivery }
+    }
+    setState(adjusted)
     if (!ready) setReady(true)
   }, [ready])
 

@@ -17,6 +17,20 @@ export function TimerPanel({ state, onStart, onPause, onNextPhase, onDone, onExp
     if (isExpired) onExpired?.()
   }, [isExpired]) // eslint-disable-line
 
+  // Keep the tab title in sync with the live timer so users can glance at
+  // other tabs (or the phone task-switcher) and still see how much time is left
+  useEffect(() => {
+    if (state.timerRunning && active) {
+      const phase = active.status === 'qa' ? 'Q&A' : 'PRESENT'
+      document.title = `${displayTime} ${phase} — ${active.name} · Lightning Ladder`
+    } else {
+      document.title = 'lightning-ladder'
+    }
+    return () => {
+      document.title = 'lightning-ladder'
+    }
+  }, [displayTime, state.timerRunning, active])
+
   if (!active) return null
 
   const isRunning = state.timerRunning
