@@ -206,6 +206,8 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   const waiting = state.speakers.filter((s) => s.status === 'waiting')
   const done    = state.speakers.filter((s) => s.status === 'done')
   const allDone = state.speakers.length > 0 && waiting.length === 0 && !active
+  // The current speaker can still be shuffled until their timer has been started
+  const activeIdle = active?.status === 'present' && !state.timerRunning && !state.pausedElapsed
 
   // ── ACTIONS ────────────────────────────────────────────────────────────────
   const joinQueue = useCallback((name) => {
@@ -311,6 +313,19 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     updateState((prev) => ({ ...prev, speakers: prev.speakers.filter((s) => s.id !== id) }))
   }, [updateState])
 
+  // If anyone waiting now sits above the current speaker, send the current speaker
+  // back to the queue and hand over to the first waiting speaker
+  const settleActiveSpeaker = useCallback((prev, speakers) => {
+    const activeIdx = speakers.findIndex((s) => s.status === 'present' || s.status === 'qa')
+    const nextIdx   = speakers.findIndex((s) => s.status === 'waiting')
+    if (activeIdx === -1 || nextIdx === -1 || nextIdx > activeIdx) return { ...prev, speakers }
+    const arr = [...speakers]
+    arr[activeIdx] = { ...arr[activeIdx], status: 'waiting', breakout: false }
+    arr[nextIdx]   = { ...arr[nextIdx], status: 'present' }
+    showToast(`${arr[activeIdx].name} moved back to the queue`)
+    return { ...prev, speakers: arr, phase: 'present', timerRunning: false, activeStartedAt: null, pausedElapsed: 0 }
+  }, [showToast])
+
   const moveSpeaker = useCallback((id, dir) => {
     updateState((prev) => {
       const arr = [...prev.speakers]
@@ -318,9 +333,9 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
       const t   = i + dir
       if (i === -1 || t < 0 || t >= arr.length) return prev;
       [arr[i], arr[t]] = [arr[t], arr[i]]
-      return { ...prev, speakers: arr }
+      return settleActiveSpeaker(prev, arr)
     })
-  }, [updateState])
+  }, [updateState, settleActiveSpeaker])
 
   const handleDragStart = useCallback((id) => {
     dragRef.current = id
@@ -344,10 +359,11 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     if (!dragRef.current) return
     dragRef.current = null
     setState((prev) => {
-      setTimeout(() => publishRef.current?.(prev), 0)
-      return prev
+      const next = settleActiveSpeaker(prev, prev.speakers)
+      setTimeout(() => publishRef.current?.(next), 0)
+      return next
     })
-  }, [])
+  }, [settleActiveSpeaker])
 
   const renameSpeaker = useCallback((id, name) => {
     updateState((prev) => ({
@@ -356,10 +372,13 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     }))
   }, [updateState])
 
-  // Randomise the order of waiting speakers only; active and done speakers keep their slots
+  // Randomise the order of waiting speakers (plus an idle current speaker); done speakers keep their slots
   const shuffleQueue = useCallback(() => {
     updateState((prev) => {
-      const slots = prev.speakers.map((s, i) => s.status === 'waiting' ? i : -1).filter((i) => i !== -1)
+      const idle  = !prev.timerRunning && !prev.pausedElapsed
+      const slots = prev.speakers
+        .map((s, i) => s.status === 'waiting' || (idle && s.status === 'present') ? i : -1)
+        .filter((i) => i !== -1)
       if (slots.length < 2) return prev
       const original = slots.map((i) => prev.speakers[i])
       let shuffled
@@ -372,7 +391,11 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
         }
       } while (shuffled.every((s, k) => s === original[k]))
       const speakers = [...prev.speakers]
-      slots.forEach((slot, k) => { speakers[slot] = shuffled[k] })
+      // Whoever lands in the first slot speaks next; everyone else waits
+      const hadActive = original.some((s) => s.status === 'present')
+      slots.forEach((slot, k) => {
+        speakers[slot] = { ...shuffled[k], status: hadActive && k === 0 ? 'present' : 'waiting' }
+      })
       return { ...prev, speakers, shuffleId: Date.now() + '_' + Math.random().toString(36).slice(2) }
     })
   }, [updateState])
@@ -494,9 +517,9 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
           </div>
         )}
 
-        {waiting.length > 1 && (
+        {waiting.length + (activeIdle ? 1 : 0) > 1 && (
           <div className={styles.queueTools}>
-            <button className={`btn btn-ghost ${styles.shuffleBtn}`} onClick={shuffleQueue} title="Shuffle waiting speakers">
+            <button className={`btn btn-ghost ${styles.shuffleBtn}`} onClick={shuffleQueue} title="Shuffle speakers who haven't started">
               <ShuffleIcon /> SHUFFLE
             </button>
           </div>
