@@ -20,6 +20,24 @@ const ShuffleIcon = () => (
   </svg>
 )
 
+const SYNC_TIMEOUT_MS   = 2500
+const SNAPSHOT_MAX_AGE  = 7 * 24 * 60 * 60 * 1000
+const snapshotKey = (roomId) => `ll-room-state-${roomId}`
+
+// Last known state saved in this browser, used when nobody else is in the room
+function loadSnapshot(roomId) {
+  try {
+    const { savedAt, state } = JSON.parse(localStorage.getItem(snapshotKey(roomId)))
+    if (!state?.speakers?.length || Date.now() - savedAt > SNAPSHOT_MAX_AGE) return null
+    if (!state.timerRunning || !state.activeStartedAt) return state
+    // Restore with the timer paused where it was when saved
+    const pausedElapsed = Math.max(0, Math.floor((savedAt - state.activeStartedAt) / 1000))
+    return { ...state, timerRunning: false, activeStartedAt: null, pausedElapsed }
+  } catch {
+    return null
+  }
+}
+
 const INITIAL_STATE = {
   speakers: [],
   presentMins: 5,
@@ -64,7 +82,15 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   }, [])
 
   const publishRef = useRef(null)
+  const requestSyncRef = useRef(null)
   const dragRef = useRef(null)
+  const stateRef = useRef(INITIAL_STATE)
+  // syncedRef: local state is known to match the room, so it is safe to publish.
+  // Until then nothing is published, so a client with an empty or stale list can't wipe everyone else's.
+  const syncedRef = useRef(false)
+  const lastStateAtRef = useRef(0)
+  const syncTimerRef = useRef(null)
+  const isNewRef = useRef(!!roomConfig?.isNew)
   const publishedCleanRef = useRef(false)
 
   // When this is a brand-new room (isNew), wipe any stale Ably history by
@@ -147,14 +173,75 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     onLeave(isLastOne)
   }, [onLeave, roomId, roomConfig, publishRoomUpdate, isLastOne])
 
+  useEffect(() => { stateRef.current = state }, [state])
+  useEffect(() => { isNewRef.current = !!roomConfig?.isNew }, [roomConfig?.isNew])
+
+  // Keep a copy of the list in this browser so it survives everyone leaving the room
+  useEffect(() => {
+    if (!syncedRef.current) return
+    try {
+      if (state.speakers.length > 0) {
+        localStorage.setItem(snapshotKey(roomId), JSON.stringify({ savedAt: Date.now(), state }))
+      } else {
+        localStorage.removeItem(snapshotKey(roomId))
+      }
+    } catch { /* storage unavailable */ }
+  }, [state, roomId])
+
+  const safePublish = useCallback((next) => {
+    if (syncedRef.current) publishRef.current?.(next)
+  }, [])
+
+  const markSynced = useCallback(() => {
+    syncedRef.current = true
+    clearTimeout(syncTimerRef.current)
+    setReady(true)
+  }, [])
+
+  // On joining (or after a tab missed messages) ask the room for the current list.
+  // If nobody answers we're alone: keep what we have, or restore this browser's saved copy.
+  const handleResync = useCallback(() => {
+    syncedRef.current = false
+    requestSyncRef.current?.()
+    clearTimeout(syncTimerRef.current)
+    syncTimerRef.current = setTimeout(() => {
+      if (syncedRef.current) return
+      const restored = lastStateAtRef.current === 0 && !isNewRef.current && loadSnapshot(roomId)
+      markSynced()
+      if (restored) {
+        setState(restored)
+        publishRef.current?.(restored)
+        showToast('Restored the list saved in this browser')
+      }
+    }, SYNC_TIMEOUT_MS)
+  }, [roomId, markSynced, showToast])
+
+  // Someone else is asking for the list: answer after a short random delay,
+  // unless another client answers first
+  const handleSyncRequest = useCallback(() => {
+    if (!syncedRef.current) return
+    const askedAt = Date.now()
+    setTimeout(() => {
+      if (!syncedRef.current || lastStateAtRef.current >= askedAt) return
+      publishRef.current?.(stateRef.current)
+    }, Math.random() * 400)
+  }, [])
+
+  useEffect(() => () => clearTimeout(syncTimerRef.current), [])
+
   // Sync state + publish to Ably
+  // While disconnected or catching up, refuse changes rather than letting them silently vanish
   const updateState = useCallback((updater) => {
+    if (!syncedRef.current) {
+      showToast('Reconnecting… try again in a moment')
+      return
+    }
     setState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
-      setTimeout(() => publishRef.current?.(next), 0)
+      setTimeout(() => safePublish(next), 0)
       return next
     })
-  }, [])
+  }, [safePublish, showToast])
 
   // Handle incoming remote state
   // messageTimestamp is the Ably server-side timestamp (ms since epoch).
@@ -182,22 +269,27 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
       const totalElapsed      = elapsedAtPublish + timeSincePublish
       adjusted = { ...remote, activeStartedAt: Date.now() - totalElapsed }
     }
+    lastStateAtRef.current = Date.now()
     setState(adjusted)
-    if (!ready) setReady(true)
-  }, [ready])
+    markSynced()
+  }, [markSynced])
 
-  const { publish } = useAbly({
+  const { publish, requestSync } = useAbly({
     roomId,
     onStateUpdate: handleRemoteState,
-    onConnected: () => { setConnected(true); setConnecting(false); setReady(true) },
-    onDisconnected: () => { setConnected(false); setConnecting(false) },
+    onSyncRequest: handleSyncRequest,
+    onResync: handleResync,
+    // Always re-check with the room after (re)connecting; until then nothing can be changed
+    onConnected: () => { setConnected(true); setConnecting(false); handleResync() },
+    onDisconnected: () => { syncedRef.current = false; setConnected(false); setConnecting(false) },
   })
 
   useEffect(() => { publishRef.current = publish }, [publish])
+  useEffect(() => { requestSyncRef.current = requestSync }, [requestSync])
 
-  // Show app after either connection or 4s timeout
+  // If we can't connect at all, show the app (offline) after 8s instead of spinning forever
   useEffect(() => {
-    const t = setTimeout(() => { setReady(true); setConnecting(false) }, 4000)
+    const t = setTimeout(() => { setReady(true); setConnecting(false) }, 8000)
     return () => clearTimeout(t)
   }, [])
 
@@ -338,8 +430,12 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   }, [updateState, settleActiveSpeaker])
 
   const handleDragStart = useCallback((id) => {
+    if (!syncedRef.current) {
+      showToast('Reconnecting… try again in a moment')
+      return
+    }
     dragRef.current = id
-  }, [])
+  }, [showToast])
 
   const handleDragEnter = useCallback((targetId) => {
     const draggedId = dragRef.current
@@ -360,10 +456,10 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     dragRef.current = null
     setState((prev) => {
       const next = settleActiveSpeaker(prev, prev.speakers)
-      setTimeout(() => publishRef.current?.(next), 0)
+      setTimeout(() => safePublish(next), 0)
       return next
     })
-  }, [settleActiveSpeaker])
+  }, [safePublish, settleActiveSpeaker])
 
   const renameSpeaker = useCallback((id, name) => {
     updateState((prev) => ({
