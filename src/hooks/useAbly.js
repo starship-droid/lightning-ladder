@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react'
 import Ably from 'ably'
 
-export function useAbly({ roomId, onStateUpdate, onConnected, onDisconnected }) {
+export function useAbly({ roomId, onStateUpdate, onSyncRequest, onResync, onConnected, onDisconnected }) {
   const clientRef  = useRef(null)
   const channelRef = useRef(null)
   const isMounted  = useRef(true)
@@ -53,8 +53,24 @@ export function useAbly({ roomId, onStateUpdate, onConnected, onDisconnected }) 
       }
     })
 
+    // Another client is asking for the current state (it joined, or woke up after missing messages)
+    channel.subscribe('sync-request', (message) => {
+      if (isMounted.current && message.clientId !== client.auth.clientId) {
+        onSyncRequest?.()
+      }
+    })
+
+    // A non-resumed attach means we may have missed messages (first join, or a tab that
+    // slept long enough to lose continuity), so local state can't be trusted until re-synced
+    const handleAttach = (change) => {
+      if (isMounted.current && !change.resumed) onResync?.()
+    }
+    channel.on('attached', handleAttach)
+    channel.on('update', handleAttach)
+
     return () => {
       isMounted.current = false
+      channel.off()
       channel.unsubscribe()
       client.close()
     }
@@ -64,5 +80,9 @@ export function useAbly({ roomId, onStateUpdate, onConnected, onDisconnected }) 
     channelRef.current?.publish('state', state)
   }, [])
 
-  return { publish }
+  const requestSync = useCallback(() => {
+    channelRef.current?.publish('sync-request', {})
+  }, [])
+
+  return { publish, requestSync }
 }
