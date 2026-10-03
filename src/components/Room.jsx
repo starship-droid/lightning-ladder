@@ -230,13 +230,18 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   useEffect(() => () => clearTimeout(syncTimerRef.current), [])
 
   // Sync state + publish to Ably
+  // While disconnected or catching up, refuse changes rather than letting them silently vanish
   const updateState = useCallback((updater) => {
+    if (!syncedRef.current) {
+      showToast('Reconnecting… try again in a moment')
+      return
+    }
     setState((prev) => {
       const next = typeof updater === 'function' ? updater(prev) : updater
       setTimeout(() => safePublish(next), 0)
       return next
     })
-  }, [safePublish])
+  }, [safePublish, showToast])
 
   // Handle incoming remote state
   // messageTimestamp is the Ably server-side timestamp (ms since epoch).
@@ -274,8 +279,9 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     onStateUpdate: handleRemoteState,
     onSyncRequest: handleSyncRequest,
     onResync: handleResync,
-    onConnected: () => { setConnected(true); setConnecting(false) },
-    onDisconnected: () => { setConnected(false); setConnecting(false) },
+    // Always re-check with the room after (re)connecting; until then nothing can be changed
+    onConnected: () => { setConnected(true); setConnecting(false); handleResync() },
+    onDisconnected: () => { syncedRef.current = false; setConnected(false); setConnecting(false) },
   })
 
   useEffect(() => { publishRef.current = publish }, [publish])
@@ -409,8 +415,12 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
   }, [updateState])
 
   const handleDragStart = useCallback((id) => {
+    if (!syncedRef.current) {
+      showToast('Reconnecting… try again in a moment')
+      return
+    }
     dragRef.current = id
-  }, [])
+  }, [showToast])
 
   const handleDragEnter = useCallback((targetId) => {
     const draggedId = dragRef.current
