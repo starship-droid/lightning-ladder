@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { useAbly } from '../hooks/useAbly'
 import { useToast } from '../hooks/useToast'
 import { useRoomPresence } from '../hooks/useRoomPresence'
@@ -11,6 +11,14 @@ import { SharedNotes } from './SharedNotes'
 import { Footer } from './Footer'
 import { LeaveModal } from './LeaveModal'
 import styles from '../App.module.css'
+
+const ShuffleIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m18 14 4 4-4 4" /><path d="m18 2 4 4-4 4" />
+    <path d="M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-7.6a4 4 0 0 1 3.3-1.7H22" />
+    <path d="M2 6h1.972a4 4 0 0 1 3.28 1.7l.359.5" /><path d="M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" />
+  </svg>
+)
 
 const INITIAL_STATE = {
   speakers: [],
@@ -348,6 +356,54 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
     }))
   }, [updateState])
 
+  // Randomise the order of waiting speakers only; active and done speakers keep their slots
+  const shuffleQueue = useCallback(() => {
+    updateState((prev) => {
+      const slots = prev.speakers.map((s, i) => s.status === 'waiting' ? i : -1).filter((i) => i !== -1)
+      if (slots.length < 2) return prev
+      const original = slots.map((i) => prev.speakers[i])
+      let shuffled
+      // Reshuffle until the order actually changes, so a shuffle is always visible
+      do {
+        shuffled = [...original]
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+      } while (shuffled.every((s, k) => s === original[k]))
+      const speakers = [...prev.speakers]
+      slots.forEach((slot, k) => { speakers[slot] = shuffled[k] })
+      return { ...prev, speakers, shuffleId: Date.now() + '_' + Math.random().toString(36).slice(2) }
+    })
+  }, [updateState])
+
+  // Animate rows from their old to new positions whenever a shuffle arrives (local or remote)
+  const listRef = useRef(null)
+  const rowTopsRef = useRef({})
+  const lastShuffleRef = useRef(null)
+  useLayoutEffect(() => {
+    const rows = listRef.current ? [...listRef.current.querySelectorAll('[data-id]')] : []
+    const tops = Object.fromEntries(rows.map((r) => [r.dataset.id, r.offsetTop]))
+    const isNewShuffle = state.shuffleId && state.shuffleId !== lastShuffleRef.current
+    if (isNewShuffle && Object.keys(rowTopsRef.current).length > 0) {
+      rows.forEach((row, i) => {
+        const prevTop = rowTopsRef.current[row.dataset.id]
+        const dy = prevTop == null ? 0 : prevTop - tops[row.dataset.id]
+        if (!dy) return
+        row.animate(
+          [{ transform: `translateY(${dy}px)` }, { transform: 'none' }],
+          { duration: 500, delay: i * 30, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+        )
+        row.classList.remove(styles.shuffleFlash)
+        void row.offsetWidth
+        row.classList.add(styles.shuffleFlash)
+      })
+      showToast('Queue shuffled')
+    }
+    lastShuffleRef.current = state.shuffleId
+    rowTopsRef.current = tops
+  })
+
   const resetSession = useCallback(() => {
     if (!confirm('Reset entire session? This clears all speakers.')) return
     updateState((prev) => ({
@@ -438,7 +494,15 @@ export function Room({ roomId, roomUrl, roomConfig, userId, theme, onThemeToggle
           </div>
         )}
 
-        <div className={styles.rosterList}>
+        {waiting.length > 1 && (
+          <div className={styles.queueTools}>
+            <button className={`btn btn-ghost ${styles.shuffleBtn}`} onClick={shuffleQueue} title="Shuffle waiting speakers">
+              <ShuffleIcon /> SHUFFLE
+            </button>
+          </div>
+        )}
+
+        <div className={styles.rosterList} ref={listRef}>
           {state.speakers.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyIcon}>⚡</div>

@@ -203,3 +203,25 @@
   color: var(--text-dim);
   letter-spacing: 0.2em;
 }
+.queueTools {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.shuffleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  padding: 5px 12px;
+}
+
+.shuffleFlash {
+  animation: shuffle-flash 1.2s ease-out;
+}
+
+@keyframes shuffle-flash {
+  0%, 30% { box-shadow: 0 0 0 1px var(--amber), 0 0 16px var(--amber-glow); }
+  100%    { box-shadow: 0 0 0 1px transparent, 0 0 16px transparent; }
+}
