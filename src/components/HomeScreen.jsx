@@ -397,7 +397,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom, myRooms = [], onRemoveMyR
         {/* Version footer */}
         <div className={styles.versionFooter}>
           <a href="#" className={styles.lobbyLink}>⚡ LIGHTNING LADDER</a>
-          &nbsp;·&nbsp; <strong>v3.3</strong>
+          &nbsp;·&nbsp; <strong>v3.4</strong>
           &nbsp;·&nbsp;
           <a
             href="https://github.com/starship-droid/lightning-ladder"

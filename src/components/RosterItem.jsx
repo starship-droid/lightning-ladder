@@ -7,6 +7,7 @@ export function RosterItem({ speaker, index, total, onDelete, onMove, onRename, 
 
   const isActive  = speaker.status === 'present' || speaker.status === 'qa'
   const canAct    = !isActive && speaker.status !== 'done'
+  const canMove   = speaker.status !== 'done'
 
   const confirmEdit = () => {
     const trimmed = editVal.trim()
@@ -36,10 +37,10 @@ export function RosterItem({ speaker, index, total, onDelete, onMove, onRename, 
     >
       <div className={styles.left}>
         <span
-          className={`${styles.dragHandle} ${!canAct ? styles.dragDisabled : ''}`}
-          draggable={canAct}
+          className={`${styles.dragHandle} ${!canMove ? styles.dragDisabled : ''}`}
+          draggable={canMove}
           onDragStart={(e) => {
-            if (!canAct) { e.preventDefault(); return }
+            if (!canMove) { e.preventDefault(); return }
             e.dataTransfer.effectAllowed = 'move'
             const row = e.target.closest('[data-id]')
             if (row) e.dataTransfer.setDragImage(row, 0, 20)
@@ -83,9 +84,9 @@ export function RosterItem({ speaker, index, total, onDelete, onMove, onRename, 
             <button className="icon-btn" style={{ color: 'var(--red)', borderColor: 'var(--red)' }} onClick={cancelEdit}>✕</button>
           </div>
         ) : (
-          <div className={`${styles.queueActions} ${isActive ? styles.hidden : ''}`}>
-            <button className="icon-btn" title="Move up"    disabled={!canAct || index === 0}         onClick={() => onMove(speaker.id, -1)}>↑</button>
-            <button className="icon-btn" title="Move down"  disabled={!canAct || index === total - 1} onClick={() => onMove(speaker.id, +1)}>↓</button>
+          <div className={styles.queueActions}>
+            <button className="icon-btn" title="Move up"    disabled={!canMove || index === 0}         onClick={() => onMove(speaker.id, -1)}>↑</button>
+            <button className="icon-btn" title={isActive ? 'Move back to queue' : 'Move down'} disabled={!canMove || index === total - 1} onClick={() => onMove(speaker.id, +1)}>↓</button>
             <button className="icon-btn" title="Edit name"  disabled={!canAct}                        onClick={() => { setEditVal(speaker.name); setEditing(true) }}>✎</button>
             <button className="icon-btn del" title="Remove" disabled={isActive}                       onClick={() => onDelete(speaker.id)}>✕</button>
           </div>
